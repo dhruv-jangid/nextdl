@@ -1,0 +1,64 @@
+name: Build and Publish NextYT App (Multi-Platform)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Download yt-dlp
+        run: |
+          mkdir -p main/binaries
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe -o main/binaries/yt-dlp.exe
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos -o main/binaries/yt-dlp
+            chmod +x main/binaries/yt-dlp
+          else
+            curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o main/binaries/yt-dlp
+            chmod +x main/binaries/yt-dlp
+          fi
+
+      - name: Download ffmpeg & ffprobe
+        run: |
+          mkdir -p main/binaries
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            curl -L https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip -o ffmpeg.zip
+            unzip ffmpeg.zip
+            cp ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe main/binaries/ffmpeg.exe
+            cp ffmpeg-master-latest-win64-gpl/bin/ffprobe.exe main/binaries/ffprobe.exe
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install ffmpeg
+            cp $(which ffmpeg) main/binaries/ffmpeg
+            cp $(which ffprobe) main/binaries/ffprobe
+          else
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+            cp $(which ffmpeg) main/binaries/ffmpeg
+            cp $(which ffprobe) main/binaries/ffprobe
+          fi
+
+      - name: Build and Publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run publish

@@ -1,0 +1,27 @@
+appId: com.dhruvjangid.nextyt
+productName: NextYT
+icon: ./app/favicon.ico
+
+files:
+  - out/**/*
+
+publish:
+  - provider: github
+    owner: dhruvvjangidd
+    repo: nextyt
+
+win:
+  target: nsis
+
+mac:
+  target: dmg
+
+linux:
+  target: AppImage
+  category: Utility
+
+extraResources:
+  - from: main/binaries/
+    to: binaries
+    filter:
+      - "**/*"
