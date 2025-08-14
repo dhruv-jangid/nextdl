@@ -9,56 +9,98 @@ jobs:
   build:
     name: Build for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: npm
 
-      - name: Install dependencies
-        run: npm install
+      - name: Setup FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        uses: AnimMouse/setup-ffmpeg@v1
 
-      - name: Download yt-dlp
+      - name: Setup FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        uses: AnimMouse/setup-ffmpeg@v1
+
+      - name: Setup FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        uses: AnimMouse/setup-ffmpeg@v1
+
+      - name: Setup yt-dlp
+        uses: AnimMouse/setup-yt-dlp@v3
+        with:
+          ffmpeg: false
+
+      - name: Verify ffmpeg, ffprobe, yt-dlp (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          which ffmpeg
+          which ffprobe
+          which yt-dlp
+          ffmpeg -version
+          ffprobe -version
+          yt-dlp --version
+
+      - name: Verify ffmpeg, ffprobe, yt-dlp (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Get-Command ffmpeg
+          Get-Command ffprobe
+          Get-Command yt-dlp
+          ffmpeg -version
+          ffprobe -version
+          yt-dlp --version
+
+      - name: Install dependencies (CI)
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund --progress=false
+          else
+            npm install --no-audit --no-fund --progress=false --legacy-peer-deps
+          fi
+        shell: bash
+
+      - name: Stage binaries (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
           mkdir -p main/binaries
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe -o main/binaries/yt-dlp.exe
-          elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos -o main/binaries/yt-dlp
-            chmod +x main/binaries/yt-dlp
-          else
-            curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o main/binaries/yt-dlp
-            chmod +x main/binaries/yt-dlp
-          fi
+          cp "$(command -v ffmpeg)"  main/binaries/ffmpeg
+          cp "$(command -v ffprobe)" main/binaries/ffprobe
+          cp "$(command -v yt-dlp)"  main/binaries/yt-dlp
+          chmod +x main/binaries/*
 
-      - name: Download ffmpeg & ffprobe
+      - name: Stage binaries (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          mkdir -p main/binaries
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            curl -L https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip -o ffmpeg.zip
-            unzip ffmpeg.zip
-            cp ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe main/binaries/ffmpeg.exe
-            cp ffmpeg-master-latest-win64-gpl/bin/ffprobe.exe main/binaries/ffprobe.exe
-          elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            brew install ffmpeg
-            cp $(which ffmpeg) main/binaries/ffmpeg
-            cp $(which ffprobe) main/binaries/ffprobe
-          else
-            sudo apt-get update
-            sudo apt-get install -y ffmpeg
-            cp $(which ffmpeg) main/binaries/ffmpeg
-            cp $(which ffprobe) main/binaries/ffprobe
-          fi
+          New-Item -ItemType Directory -Force -Path main/binaries | Out-Null
+          Copy-Item (Get-Command ffmpeg).Source  main/binaries/ffmpeg.exe  -Force
+          Copy-Item (Get-Command ffprobe).Source main/binaries/ffprobe.exe -Force
+          Copy-Item (Get-Command yt-dlp).Source main/binaries/yt-dlp.exe  -Force
+
+      - name: List staged binaries (Unix)
+        if: runner.os != 'Windows'
+        run: ls -lah main/binaries
+
+      - name: List staged binaries (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Get-ChildItem -Path main/binaries -Force
 
       - name: Build and Publish
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: npm run publish

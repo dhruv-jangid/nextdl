@@ -11,8 +11,9 @@ import { autoUpdater } from "electron-updater";
 import { app, BrowserWindow, ipcMain } from "electron/main";
 
 let mainWindow: BrowserWindow;
-const YT_DLP = getBundledBinary("yt-dlp.exe");
-const FFMPEG = getBundledBinary("ffmpeg.exe");
+const isWin = process.platform === "win32";
+const YT_DLP = getBundledBinary(isWin ? "yt-dlp.exe" : "yt-dlp");
+const FFMPEG = getBundledBinary(isWin ? "ffmpeg.exe" : "ffmpeg");
 const DOWNLOAD_DIR = path.join(os.homedir(), "Downloads");
 const outTemplate = path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s");
 

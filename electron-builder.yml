@@ -1,24 +1,26 @@
 appId: com.dhruvjangid.nextyt
 productName: NextYT
-icon: ./app/favicon.ico
+
+mac:
+  icon: lib/icons/icon.icns
+  target: dmg
+
+win:
+  icon: lib/icons/icon.ico
+  target: nsis
+
+linux:
+  icon: lib/icons/icon.png
+  target: AppImage
+  category: Utility
 
 files:
   - out/**/*
 
 publish:
   - provider: github
-    owner: dhruvvjangidd
+    owner: dhruv-jangid
     repo: nextyt
-
-win:
-  target: nsis
-
-mac:
-  target: dmg
-
-linux:
-  target: AppImage
-  category: Utility
 
 extraResources:
   - from: main/binaries/
