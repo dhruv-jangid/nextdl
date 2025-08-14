@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NextYT
 
-## Getting Started
+A modern desktop application for converting YouTube videos to MP3/MP4 format with high quality. Built with Next.js, Electron, and TypeScript.
 
-First, run the development server:
+## Features
+
+- **MP3 Conversion**: Download YouTube videos as high-quality MP3 audio files
+- **MP4 Conversion**: Download YouTube videos as MP4 video files
+- **Fast Downloads**: Optimized for speed and efficiency
+- **Modern UI**: Beautiful, responsive interface built with Tailwind CSS
+- **Auto-updates**: Automatic application updates via GitHub releases
+- **Cross-platform**: Works on Windows, macOS, and Linux
+
+## Installation
+
+### Download from Releases
+
+Visit the [Releases page](https://github.com/dhruv-jangid/nextyt/releases) to download the latest version for your platform:
+
+- **Windows**: `.exe` installer
+- **macOS**: `.dmg` file
+- **Linux**: `.AppImage` file
+
+### Build from Source
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/dhruv-jangid/nextyt.git
+   cd nextyt
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Build the application**
+   ```bash
+   npm run build
+   npm run electron:build
+   ```
+
+## Usage
+
+1. **Launch NextYT** from your applications menu
+2. **Choose format**: Toggle between MP3 and MP4 using the switch
+3. **Paste URL**: Enter a YouTube video URL in the input field
+4. **Download**: Click the download button and wait for completion
+5. **Find files**: Downloaded files are saved to your default downloads folder
+
+## Development
+
+### Prerequisites
+
+- Node.js 20+
+- npm or yarn
+- FFmpeg, FFprobe, yt-dlp (automatically handled by CI/CD)
+
+### Development Commands
 
 ```bash
+# Install dependencies
+npm install
+
+# Run in development mode
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build for production
+npm run build
+
+# Build Electron app
+npm run electron:build
+
+# Publish release
+npm run publish
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+nextyt/
+├── app/                 # Next.js app directory
+├── components/          # React components
+├── context/            # React context providers
+├── lib/                # Utility functions
+├── main/               # Electron main process
+├── .github/            # GitHub Actions workflows
+└── electron-builder.yml # Electron build configuration
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Technologies Used
 
-## Learn More
+- **Frontend**: Next.js, TypeScript
+- **Desktop**: Electron
+- **Styling**: Tailwind CSS, shadcn/ui
+- **Build Tools**: Turbopack (Next.js), electron-builder
+- **Media Processing**: yt-dlp, FFmpeg
 
-To learn more about Next.js, take a look at the following resources:
+## Contributing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Acknowledgments
 
-## Deploy on Vercel
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - YouTube downloader
+- [FFmpeg](https://ffmpeg.org/) - Media processing
+- [shadcn/ui](https://ui.shadcn.com/) - UI components
+- [Electron](https://www.electronjs.org/) - Desktop framework
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Note**: This application is for personal use only. Please respect YouTube's terms of service and copyright laws when downloading content.

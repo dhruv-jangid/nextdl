@@ -43,6 +43,7 @@ export default function Home() {
     };
 
     window.electronAPI.onUpdateAvailable(() => {
+      setLoading(true);
       toast({ title: "Update available. Downloading..." });
     });
 
