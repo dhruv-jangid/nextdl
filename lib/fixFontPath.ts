@@ -23,15 +23,18 @@ function fixFontPaths(): void {
     try {
       let content: string = fs.readFileSync(filePath, "utf8");
 
-      const updatedContent: string = content.replace(
+      content = content.replace(
         /(@font-face[^}]*url\(['"]?)\/Geist\.woff2(['"]?\))/g,
         "$1../../../Geist.woff2$2"
       );
 
-      if (content !== updatedContent) {
-        fs.writeFileSync(filePath, updatedContent, "utf8");
-        console.log(`Fixed font paths in: ${path.basename(filePath)}`);
-      }
+      content = content.replace(
+        /(@font-face[^}]*url\(['"]?)\/GeistMono\.woff2(['"]?\))/g,
+        "$1../../../GeistMono.woff2$2"
+      );
+
+      fs.writeFileSync(filePath, content, "utf8");
+      console.log(`Fixed font paths in: ${path.basename(filePath)}`);
     } catch (error) {
       console.error(`Error processing ${filePath}:`, error);
     }
