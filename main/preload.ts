@@ -3,6 +3,10 @@ import { contextBridge, ipcRenderer } from "electron";
 contextBridge.exposeInMainWorld("electronAPI", {
   onUpdateAvailable: (cb) => ipcRenderer.on("update-available", cb),
   onUpdateDownloaded: (cb) => ipcRenderer.on("update-downloaded", cb),
+  onUpdateProgress: (cb) =>
+    ipcRenderer.on("update-progress", (_e: any, pct: any) => cb(pct)),
+  onUpdateError: (cb) =>
+    ipcRenderer.on("update-error", (_e: any, err: any) => cb(err)),
   installUpdate: () => ipcRenderer.send("install-update"),
   selectDownloadLocation: () => ipcRenderer.invoke("selectDownloadLocation"),
   showSaveDialog: (defaultName: string, fileExtension: string) =>
@@ -24,6 +28,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.removeAllListeners("download-status");
     ipcRenderer.removeAllListeners("download-complete");
     ipcRenderer.removeAllListeners("download-error");
+    ipcRenderer.removeAllListeners("update-progress");
+    ipcRenderer.removeAllListeners("update-error");
   },
   getPreferences: () => ipcRenderer.invoke("getPreferences"),
   setPreferences: (preferences: any) =>

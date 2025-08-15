@@ -52,12 +52,27 @@ export default function Home() {
 
     window.electronAPI.onUpdateAvailable(() => {
       setLoading(true);
+      setProgress(0);
+      setStatus("Update available. Downloading...");
       toast({ title: "Update available. Downloading..." });
     });
 
+    window.electronAPI.onUpdateProgress((percent: number) => {
+      setProgress(percent);
+      setStatus(`Downloading update... ${percent}%`);
+    });
+
     window.electronAPI.onUpdateDownloaded(() => {
+      setProgress(100);
+      setStatus("Update downloaded. Installing...");
       toast({ title: "Update downloaded. Installing..." });
       window.electronAPI.installUpdate();
+    });
+
+    window.electronAPI.onUpdateError((error: string) => {
+      setLoading(false);
+      setStatus("Update error: " + error);
+      errorToast({ title: "Update failed: " + error });
     });
 
     window.electronAPI.onProgress(onProgress);

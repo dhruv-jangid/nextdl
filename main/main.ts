@@ -44,9 +44,22 @@ autoUpdater.on("update-available", () => {
   }
 });
 
+autoUpdater.on("download-progress", (progressObj) => {
+  if (mainWindow) {
+    const percent = Math.round(progressObj.percent);
+    mainWindow.webContents.send("update-progress", percent);
+  }
+});
+
 autoUpdater.on("update-downloaded", () => {
   if (mainWindow) {
     mainWindow.webContents.send("update-downloaded");
+  }
+});
+
+autoUpdater.on("error", (error) => {
+  if (mainWindow) {
+    mainWindow.webContents.send("update-error", error.message);
   }
 });
 

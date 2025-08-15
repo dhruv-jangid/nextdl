@@ -2,6 +2,8 @@ interface Window {
   electronAPI: {
     onUpdateAvailable: (callback: () => void) => void;
     onUpdateDownloaded: (callback: () => void) => void;
+    onUpdateProgress: (callback: (percent: number) => void) => void;
+    onUpdateError: (callback: (error: string) => void) => void;
     installUpdate: () => void;
     selectDownloadLocation: () => Promise<string | null>;
     showSaveDialog: (
