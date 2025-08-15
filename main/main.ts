@@ -4,18 +4,24 @@ import {
   bestVideoArgs,
   getBundledBinary,
 } from "./utils";
-import os from "os";
 import path from "path";
+import Store from "electron-store";
 import { spawn } from "child_process";
 import { autoUpdater } from "electron-updater";
-import { app, BrowserWindow, ipcMain } from "electron/main";
+import { app, BrowserWindow, ipcMain, dialog } from "electron/main";
+
+const store = new Store({
+  defaults: {
+    format: "mp3",
+    locationMode: "ask",
+    downloadLocation: "",
+  },
+});
 
 let mainWindow: BrowserWindow;
 const isWin = process.platform === "win32";
 const YT_DLP = getBundledBinary(isWin ? "yt-dlp.exe" : "yt-dlp");
 const FFMPEG = getBundledBinary(isWin ? "ffmpeg.exe" : "ffmpeg");
-const DOWNLOAD_DIR = path.join(os.homedir(), "Downloads");
-const outTemplate = path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s");
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -47,6 +53,58 @@ ipcMain.on("install-update", () => {
   autoUpdater.quitAndInstall();
 });
 
+ipcMain.handle("selectDownloadLocation", async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ["openDirectory"],
+    title: "Select Download Location",
+  });
+
+  if (!result.canceled && result.filePaths.length > 0) {
+    return result.filePaths[0];
+  } else {
+    return null;
+  }
+});
+
+ipcMain.handle(
+  "showSaveDialog",
+  async (event, defaultName: string, fileExtension: string) => {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: "Save File As",
+      defaultPath: defaultName + fileExtension,
+      filters: [
+        {
+          name: fileExtension === ".mp3" ? "Audio Files" : "Video Files",
+          extensions: [fileExtension.substring(1)],
+        },
+      ],
+    });
+
+    if (!result.canceled && result.filePath) {
+      return result.filePath;
+    } else {
+      return null;
+    }
+  }
+);
+
+ipcMain.handle("getPreferences", () => {
+  return {
+    format: store.get("format"),
+    locationMode: store.get("locationMode"),
+    downloadLocation: store.get("downloadLocation"),
+  };
+});
+
+ipcMain.handle("setPreferences", (event, preferences: any) => {
+  if (preferences.format) store.set("format", preferences.format);
+  if (preferences.locationMode)
+    store.set("locationMode", preferences.locationMode);
+  if (preferences.downloadLocation !== undefined)
+    store.set("downloadLocation", preferences.downloadLocation);
+  return true;
+});
+
 app.on("ready", createWindow);
 
 app.on("window-all-closed", () => {
@@ -55,10 +113,25 @@ app.on("window-all-closed", () => {
   }
 });
 
-ipcMain.on("downloadMp4", (event, url) => {
+ipcMain.on("downloadMp4", (event, url, filePath) => {
   if (!isValidUrl(url)) {
     event.reply("download-error", "Invalid URL");
     return;
+  }
+
+  if (!filePath) {
+    event.reply("download-error", "No save location selected");
+    return;
+  }
+
+  let outTemplate: string;
+
+  if (filePath.includes("%(title)s.%(ext)s")) {
+    outTemplate = filePath;
+  } else {
+    const downloadDir = path.dirname(filePath);
+    const filename = path.basename(filePath, path.extname(filePath));
+    outTemplate = path.join(downloadDir, filename + ".%(ext)s");
   }
 
   let proc;
@@ -128,10 +201,25 @@ ipcMain.on("downloadMp4", (event, url) => {
   });
 });
 
-ipcMain.on("downloadMp3", (event, url) => {
+ipcMain.on("downloadMp3", (event, url, filePath) => {
   if (!isValidUrl(url)) {
     event.reply("download-error", "Invalid URL");
     return;
+  }
+
+  if (!filePath) {
+    event.reply("download-error", "No save location selected");
+    return;
+  }
+
+  let outTemplate: string;
+
+  if (filePath.includes("%(title)s.%(ext)s")) {
+    outTemplate = filePath;
+  } else {
+    const downloadDir = path.dirname(filePath);
+    const filename = path.basename(filePath, path.extname(filePath));
+    outTemplate = path.join(downloadDir, filename + ".%(ext)s");
   }
 
   let proc;

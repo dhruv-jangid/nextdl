@@ -4,8 +4,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onUpdateAvailable: (cb) => ipcRenderer.on("update-available", cb),
   onUpdateDownloaded: (cb) => ipcRenderer.on("update-downloaded", cb),
   installUpdate: () => ipcRenderer.send("install-update"),
-  downloadMp3: (url: any) => ipcRenderer.send("downloadMp3", url),
-  downloadMp4: (url: any) => ipcRenderer.send("downloadMp4", url),
+  selectDownloadLocation: () => ipcRenderer.invoke("selectDownloadLocation"),
+  showSaveDialog: (defaultName: string, fileExtension: string) =>
+    ipcRenderer.invoke("showSaveDialog", defaultName, fileExtension),
+  downloadMp3: (url: any, filePath?: string) =>
+    ipcRenderer.send("downloadMp3", url, filePath),
+  downloadMp4: (url: any, filePath?: string) =>
+    ipcRenderer.send("downloadMp4", url, filePath),
   onProgress: (cb: (arg0: any) => any) =>
     ipcRenderer.on("download-progress", (_e: any, pct: any) => cb(pct)),
   onStatus: (cb: (arg0: any) => any) =>
@@ -20,4 +25,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.removeAllListeners("download-complete");
     ipcRenderer.removeAllListeners("download-error");
   },
+  getPreferences: () => ipcRenderer.invoke("getPreferences"),
+  setPreferences: (preferences: any) =>
+    ipcRenderer.invoke("setPreferences", preferences),
 } satisfies Window["electronAPI"]);
