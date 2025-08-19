@@ -30,26 +30,6 @@ export default function Home() {
       return;
     }
 
-    const onProgress = (percent: number) => {
-      const p = Number(percent);
-      setProgress(Number.isFinite(p) ? p : 0);
-    };
-
-    const onStatus = (msg: string) => setStatus(msg);
-
-    const onComplete = (msg?: string) => {
-      setLoading(false);
-      setProgress(100);
-      setStatus(msg || "Done");
-      success({ title: msg || "Download complete" });
-    };
-
-    const onError = (error: string) => {
-      setLoading(false);
-      errorToast({ title: error || "Error" });
-      setStatus("Error: " + (error || "unknown"));
-    };
-
     window.electronAPI.onUpdateAvailable(() => {
       setLoading(true);
       setProgress(0);
@@ -57,7 +37,7 @@ export default function Home() {
       toast({ title: "Update available. Downloading..." });
     });
 
-    window.electronAPI.onUpdateProgress((percent: number) => {
+    window.electronAPI.onUpdateProgress((percent) => {
       setProgress(percent);
       setStatus(`Downloading update... ${percent}%`);
     });
@@ -69,16 +49,31 @@ export default function Home() {
       window.electronAPI.installUpdate();
     });
 
-    window.electronAPI.onUpdateError((error: string) => {
+    window.electronAPI.onUpdateError((error) => {
       setLoading(false);
       setStatus("Update error: " + error);
       errorToast({ title: "Update failed: " + error });
     });
 
-    window.electronAPI.onProgress(onProgress);
-    window.electronAPI.onStatus(onStatus);
-    window.electronAPI.onComplete(onComplete);
-    window.electronAPI.onError(onError);
+    window.electronAPI.onProgress((percent) => {
+      const p = Number(percent);
+      setProgress(Number.isFinite(p) ? p : 0);
+    });
+
+    window.electronAPI.onStatus((msg) => setStatus(msg));
+
+    window.electronAPI.onComplete((msg) => {
+      setLoading(false);
+      setProgress(100);
+      setStatus(msg || "Done");
+      success({ title: msg || "Download complete" });
+    });
+
+    window.electronAPI.onError((error) => {
+      setLoading(false);
+      errorToast({ title: error });
+      setStatus("Error: " + error);
+    });
 
     return () => {
       window.electronAPI.removeListeners();
@@ -111,6 +106,7 @@ export default function Home() {
       }
 
       if (!filePath) {
+        errorToast({ title: "Download location not set" });
         return;
       }
 
@@ -123,9 +119,10 @@ export default function Home() {
       } else {
         window.electronAPI.downloadMp4(url, filePath);
       }
+    } catch {
+      errorToast({ title: "Something went wrong" });
+    } finally {
       setUrl("");
-    } catch (error) {
-      errorToast({ title: "Failed to start download" });
     }
   };
 
@@ -136,7 +133,7 @@ export default function Home() {
         updatePreferences({ downloadLocation: selectedPath });
         success({ title: "Download location selected" });
       }
-    } catch (error) {
+    } catch {
       errorToast({ title: "Failed to select download location" });
     }
   };

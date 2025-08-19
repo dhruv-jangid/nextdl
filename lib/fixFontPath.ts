@@ -5,7 +5,6 @@ function fixFontPaths(): void {
   const cssDir = "out/_next/static/css";
 
   if (!fs.existsSync(cssDir)) {
-    console.error("CSS directory not found:", cssDir);
     return;
   }
 
@@ -15,7 +14,6 @@ function fixFontPaths(): void {
     .map((file: string) => path.join(cssDir, file));
 
   if (cssFiles.length === 0) {
-    console.log("No CSS files found in", cssDir);
     return;
   }
 

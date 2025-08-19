@@ -1,23 +1,18 @@
 "use client";
 
+import { useToast } from "./toastProvider";
 import { createContext, useContext, useEffect, useState } from "react";
 
-interface Preferences {
+type Preferences = {
   format: "mp3" | "mp4";
   locationMode: "ask" | "choose";
   downloadLocation: string;
-}
+};
 
-interface PreferencesContextType {
+type PreferencesContextType = {
   preferences: Preferences;
   updatePreferences: (newPreferences: Partial<Preferences>) => Promise<void>;
   isLoading: boolean;
-}
-
-const defaultPreferences: Preferences = {
-  format: "mp3",
-  locationMode: "ask",
-  downloadLocation: "",
 };
 
 const PreferencesContext = createContext<PreferencesContextType | null>(null);
@@ -27,8 +22,12 @@ export const PreferencesProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [preferences, setPreferences] =
-    useState<Preferences>(defaultPreferences);
+  const [preferences, setPreferences] = useState<Preferences>({
+    format: "mp3",
+    locationMode: "ask",
+    downloadLocation: "",
+  });
+  const { error: errorToast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -37,8 +36,8 @@ export const PreferencesProvider = ({
         try {
           const savedPreferences = await window.electronAPI.getPreferences();
           setPreferences(savedPreferences);
-        } catch (error) {
-          console.error("Failed to load preferences:", error);
+        } catch {
+          errorToast({ title: "Failed to load preferences" });
         } finally {
           setIsLoading(false);
         }
@@ -51,25 +50,27 @@ export const PreferencesProvider = ({
   }, []);
 
   const updatePreferences = async (newPreferences: Partial<Preferences>) => {
-    if (!window.electronAPI) return;
+    if (!window.electronAPI) {
+      return;
+    }
 
     try {
       const updatedPreferences = { ...preferences, ...newPreferences };
       await window.electronAPI.setPreferences(newPreferences);
       setPreferences(updatedPreferences);
-    } catch (error) {
-      console.error("Failed to save preferences:", error);
+    } catch {
+      errorToast({ title: "Failed to update preferences" });
     }
   };
 
-  const value: PreferencesContextType = {
-    preferences,
-    updatePreferences,
-    isLoading,
-  };
-
   return (
-    <PreferencesContext.Provider value={value}>
+    <PreferencesContext.Provider
+      value={{
+        preferences,
+        updatePreferences,
+        isLoading,
+      }}
+    >
       {children}
     </PreferencesContext.Provider>
   );

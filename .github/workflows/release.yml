@@ -1,4 +1,4 @@
-name: Build and Publish NextYT App (Multi-Platform)
+name: Build NextYT
 
 on:
   push:

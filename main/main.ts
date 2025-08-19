@@ -82,7 +82,7 @@ ipcMain.handle("selectDownloadLocation", async () => {
 
 ipcMain.handle(
   "showSaveDialog",
-  async (event, defaultName: string, fileExtension: string) => {
+  async (_, defaultName: string, fileExtension: string) => {
     const result = await dialog.showSaveDialog(mainWindow, {
       title: "Save File As",
       defaultPath: defaultName + fileExtension,
@@ -110,7 +110,7 @@ ipcMain.handle("getPreferences", () => {
   };
 });
 
-ipcMain.handle("setPreferences", (event, preferences: any) => {
+ipcMain.handle("setPreferences", (_, preferences: any) => {
   if (preferences.format) store.set("format", preferences.format);
   if (preferences.locationMode)
     store.set("locationMode", preferences.locationMode);

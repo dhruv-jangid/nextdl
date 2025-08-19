@@ -5,7 +5,9 @@ export const smartTruncate = ({
   text: string;
   limit?: number;
 }): string => {
-  if (text.length <= limit) return text;
+  if (text.length <= limit) {
+    return text;
+  }
 
   const truncated = text.slice(0, limit);
   const lastSpace = truncated.lastIndexOf(" ");

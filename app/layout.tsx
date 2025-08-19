@@ -1,3 +1,4 @@
+import "server-only";
 import "@/app/globals.css";
 import type { Metadata } from "next";
 import { ToastProvider } from "@/context/toastProvider";
@@ -16,9 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="dark">
-        <PreferencesProvider>
-          <ToastProvider>{children}</ToastProvider>
-        </PreferencesProvider>
+        <ToastProvider>
+          <PreferencesProvider>{children}</PreferencesProvider>
+        </ToastProvider>
       </body>
     </html>
   );
