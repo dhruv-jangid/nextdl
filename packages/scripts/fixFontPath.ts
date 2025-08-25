@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
 
-function fixFontPaths(): void {
-  const cssDir = "out/_next/static/css";
+const cssDir = "apps/desktop/build/out/_next/static/css";
 
+function fixFontPaths(): void {
   if (!fs.existsSync(cssDir)) {
     return;
   }

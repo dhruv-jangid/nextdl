@@ -1,61 +1,100 @@
 # NextYT
 
-YouTube to MP4/MP3 downloader built with Next.js and Electron.
+A modern YouTube to MP4/MP3 converter built with Next.js and Electron, featuring a beautiful web interface and cross-platform desktop application.
 
 ## Features
 
-- Download YouTube videos as MP4 or MP3
-- **Flexible download modes**:
-  - **Prompt each time**: Choose save location and filename for every download
-  - **Single folder**: Set one download folder for all downloads
-- Progress tracking with real-time updates
-- Automatic updates
-- Cross-platform support (Windows, macOS, Linux)
+**Web Application**
 
-## Usage
+- Modern Next.js interface with shadcn/ui components
+- Responsive design optimized for all devices
+- Real-time conversion status and progress tracking
 
-1. **Enter YouTube URL**: Paste any YouTube video URL in the input field
-2. **Choose Format**: Toggle between MP3 and MP4 using the switch
-3. **Select Download Mode**: Choose between "Prompt Each Time" or "Single Folder"
-4. **Configure Location** (if using Single Folder): Click "Choose Folder" to select a download directory
-5. **Download**: Click the Download button to start the download
-6. **Monitor Progress**: Watch the progress bar and status updates
+**Desktop Application**
 
-## Download Modes
+- Cross-platform Electron app for offline conversion
+- Native system integration and notifications
+- Standalone operation without internet dependency
 
-### Prompt Each Time Mode
+**Technical Excellence**
 
-- **Save Dialog**: Each download prompts you to choose exactly where to save the file and what to name it
-- **Flexible**: You can save to different locations and use different filenames for each download
-- **User Control**: Full control over file naming and location for every download
+- Full TypeScript implementation for type safety
+- Monorepo architecture optimized with Turborepo
+- Modern UI framework with TailwindCSS and shadcn/ui
+- Cross-platform compatibility (Windows, macOS, Linux)
 
-### Single Folder Mode
+## Project Structure
 
-- **Consistent Location**: All downloads go to the same folder you select
-- **Automatic Naming**: Files are automatically named using the video title
-- **Batch Downloads**: Perfect for downloading multiple videos to the same location
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run in development mode
-npm run dev:next      # Next.js dev server
-npm run dev:electron  # Electron app
-
-# Build for production
-npm run build
-
-# Start production build
-npm start
+```
+nextyt/
+├── apps/
+│   ├── web/         # Next.js web application
+│   └── desktop/     # Electron desktop application
+├── packages/
+│   ├── scripts/     # Build and utility scripts
+│   └── types/       # Shared TypeScript types
+└── turbo.json       # Turborepo configuration
 ```
 
-## Technical Details
+## Getting Started
 
-- **Frontend**: Next.js 15 with React 19
-- **Desktop**: Electron with TypeScript
-- **Styling**: Tailwind CSS with shadcn/ui components
-- **Download Engine**: yt-dlp with FFmpeg for conversion
-- **IPC**: Dual-mode download handling via Electron dialog API
+### Prerequisites
+
+- [Bun](https://bun.sh/) (v1.2.21 or higher)
+- Node.js (v18 or higher)
+
+### Installation
+
+Install all dependencies:
+
+```bash
+bun install
+```
+
+### Development
+
+Start all applications in development mode:
+
+```bash
+bun dev
+```
+
+Start specific applications:
+
+```bash
+bun dev:web        # Start only the web application
+bun dev:desktop    # Start only the desktop application
+```
+
+### Building
+
+Build all applications:
+
+```bash
+bun build
+```
+
+Build specific applications:
+
+```bash
+bun build:web      # Build web application
+bun build:desktop  # Build desktop application
+```
+
+## Available Scripts
+
+- `bun dev` - Start all applications in development mode
+- `bun build` - Build all applications
+- `bun dev:web` - Start only the web application
+- `bun dev:desktop` - Start only the desktop application
+- `bun check-types` - Check TypeScript types across all apps
+- `bun cleanall` - Clean all build artifacts and node_modules
+- `bun publish` - Build and publish desktop application
+
+## Technologies Used
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: TailwindCSS 4, shadcn/ui components
+- **Desktop**: Electron, esbuild
+- **Build System**: Turborepo, Bun
+- **Package Manager**: Bun

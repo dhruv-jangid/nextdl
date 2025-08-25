@@ -12,9 +12,9 @@ import { FolderOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/context/toastProvider";
 import { Progress } from "@/components/ui/progress";
-import { usePreferences } from "@/context/preferencesProvider";
+import { useToast } from "@/components/toastProvider";
+import { usePreferences } from "@/components/preferencesProvider";
 
 export default function Home() {
   const [url, setUrl] = useState("");
@@ -176,8 +176,8 @@ export default function Home() {
             <div className="flex gap-1.5 items-center">
               <span className="text-muted-foreground">Format: </span>
               <Select
-                onValueChange={(value) =>
-                  updatePreferences({ format: value as "mp3" | "mp4" })
+                onValueChange={(value: "mp3" | "mp4") =>
+                  updatePreferences({ format: value })
                 }
                 value={preferences.format}
               >
@@ -193,8 +193,8 @@ export default function Home() {
             <div className="flex gap-1.5 items-center">
               <span className="text-muted-foreground">Download: </span>
               <Select
-                onValueChange={(value) =>
-                  updatePreferences({ locationMode: value as "ask" | "choose" })
+                onValueChange={(value: "ask" | "choose") =>
+                  updatePreferences({ locationMode: value })
                 }
                 value={preferences.locationMode}
               >

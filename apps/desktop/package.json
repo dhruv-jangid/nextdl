@@ -1,0 +1,22 @@
+{
+  "name": "desktop",
+  "private": true,
+  "main": "build/out/main.js",
+  "scripts": {
+    "build": "bun bundle && electron-builder",
+    "publish": "bun bundle && npx electron-builder --publish always",
+    "start": "electron .",
+    "dev": "bun bundle && electron .",
+    "transpile": "tsc --project tsconfig.json",
+    "bundle": "esbuild src/main.ts src/preload.ts src/utils.ts --bundle --platform=node --target=node22 --outdir=build/out --format=cjs --external:electron --external:electon-builder --external:esbuild"
+  },
+  "dependencies": {
+    "electron-store": "10.1.0",
+    "electron-updater": "6.6.2"
+  },
+  "devDependencies": {
+    "electron": "^37.3.1",
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.25.9"
+  }
+}

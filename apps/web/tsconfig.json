@@ -11,12 +11,19 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "verbatimModuleSyntax": true,
     "jsx": "preserve",
     "incremental": true,
     "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./*"] },
-    "types": ["./electron.d.ts"]
+    "paths": { "@/*": ["./src/*"] },
+    "types": ["../../packages/types/electron.d.ts"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx",
+    "./.next/types/**/*.ts",
+    "./next-env.d.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["./node_modules"]
 }

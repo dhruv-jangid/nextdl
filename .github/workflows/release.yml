@@ -23,8 +23,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 22
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Setup FFmpeg (macOS)
         if: runner.os == 'macOS'
@@ -64,43 +68,38 @@ jobs:
           ffprobe -version
           yt-dlp --version
 
-      - name: Install dependencies (CI)
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci --no-audit --no-fund --progress=false
-          else
-            npm install --no-audit --no-fund --progress=false --legacy-peer-deps
-          fi
+      - name: Install dependencies (Bun)
+        run: bun install --no-progress
         shell: bash
 
       - name: Stage binaries (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          mkdir -p main/binaries
-          cp "$(command -v ffmpeg)"  main/binaries/ffmpeg
-          cp "$(command -v ffprobe)" main/binaries/ffprobe
-          cp "$(command -v yt-dlp)"  main/binaries/yt-dlp
-          chmod +x main/binaries/*
+          mkdir -p apps/desktop/src/binaries
+          cp "$(command -v ffmpeg)"  apps/desktop/src/binaries/ffmpeg
+          cp "$(command -v ffprobe)" apps/desktop/src/binaries/ffprobe
+          cp "$(command -v yt-dlp)"  apps/desktop/src/binaries/yt-dlp
+          chmod +x apps/desktop/src/binaries/*
 
       - name: Stage binaries (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path main/binaries | Out-Null
-          Copy-Item (Get-Command ffmpeg).Source  main/binaries/ffmpeg.exe  -Force
-          Copy-Item (Get-Command ffprobe).Source main/binaries/ffprobe.exe -Force
-          Copy-Item (Get-Command yt-dlp).Source main/binaries/yt-dlp.exe  -Force
+          New-Item -ItemType Directory -Force -Path apps/desktop/src/binaries | Out-Null
+          Copy-Item (Get-Command ffmpeg).Source  apps/desktop/src/binaries/ffmpeg.exe  -Force
+          Copy-Item (Get-Command ffprobe).Source apps/desktop/src/binaries/ffprobe.exe -Force
+          Copy-Item (Get-Command yt-dlp).Source  apps/desktop/src/binaries/yt-dlp.exe  -Force
 
       - name: List staged binaries (Unix)
         if: runner.os != 'Windows'
-        run: ls -lah main/binaries
+        run: ls -lah apps/desktop/src/binaries
 
       - name: List staged binaries (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: Get-ChildItem -Path main/binaries -Force
+        run: Get-ChildItem -Path apps/desktop/src/binaries -Force
 
       - name: Build and Publish
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: npm run publish
+        run: bun run publish

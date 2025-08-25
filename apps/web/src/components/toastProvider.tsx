@@ -3,7 +3,7 @@
 import {
   Toaster,
   toast as hotToast,
-  ToastOptions as HotToastOptions,
+  type ToastOptions as HotToastOptions,
 } from "react-hot-toast";
 import { smartTruncate } from "@/lib/utils";
 import { createContext, useContext } from "react";

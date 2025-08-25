@@ -1,8 +1,8 @@
 import "server-only";
-import "@/app/globals.css";
+import "@/globals.css";
 import type { Metadata } from "next";
-import { ToastProvider } from "@/context/toastProvider";
-import { PreferencesProvider } from "@/context/preferencesProvider";
+import { ToastProvider } from "@/components/toastProvider";
+import { PreferencesProvider } from "@/components/preferencesProvider";
 
 export const metadata: Metadata = {
   title: "NextYT - YouTube to MP3/MP4",

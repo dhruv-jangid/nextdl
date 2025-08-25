@@ -1,0 +1,39 @@
+appId: com.dhruvjangid.nextyt
+productName: NextYT
+
+extraMetadata:
+  name: nextyt
+  version: 2.0.0
+  author: dhruvjangid
+  description: YouTube to MP4/MP3
+
+directories:
+  output: build/dist
+
+files:
+  - build/out/**/*
+
+extraResources:
+  - from: src/binaries/
+    to: binaries
+    filter:
+      - "**/*"
+
+mac:
+  icon: src/icons/icon.icns
+  target: dmg
+
+win:
+  icon: src/icons/icon.ico
+  target: nsis
+
+linux:
+  icon: src/icons/icon.png
+  target: AppImage
+  category: Utility
+
+publish:
+  - provider: github
+    owner: dhruv-jangid
+    repo: nextyt
+    token: ${env.GH_TOKEN}
