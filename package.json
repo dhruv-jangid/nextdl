@@ -1,6 +1,6 @@
 {
   "name": "nextyt",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "private": true,
   "author": "dhruvjangid",
   "description": "YouTube to MP4/MP3",
@@ -20,14 +20,17 @@
     "fixfont": "bun run packages/scripts/fixFontPath.ts",
     "cleanall": "bun cleanbuild && rm -rf apps/desktop/node_modules apps/web/node_modules bun.lock",
     "cleanbuild": "rm -rf apps/desktop/build apps/web/.turbo apps/web/.next apps/desktop/.turbo .turbo",
-    "publish": "bun build:web && turbo -F desktop publish"
+    "publish": "bun build:web && turbo -F desktop publish",
+    "down": "bun run packages/scripts/downloadBinaries.ts"
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "^24.3.0",
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "^24.3.1",
+    "adm-zip": "^0.5.16",
     "fs-extra": "^11.3.1",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.5",
+    "lint-staged": "^16.1.6",
     "turbo": "^2.5.6",
     "typescript": "^5.9.2"
   },
