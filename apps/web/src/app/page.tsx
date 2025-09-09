@@ -1,79 +1,114 @@
 "use client";
 
 import {
+  Dialog,
+  DialogTitle,
+  DialogHeader,
+  DialogTrigger,
+  DialogContent,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectItem,
   SelectValue,
   SelectContent,
   SelectTrigger,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import { isValidUrl } from "@/lib/utils";
-import { FolderOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/components/toastProvider";
-import { usePreferences } from "@/components/preferencesProvider";
+import { ThemeToggle } from "@/components/themeToggle";
+import { AudioOptions } from "@/components/audioOptions";
+import { VideoOptions } from "@/components/videoOptions";
+import { usePreferences } from "@/components/providers/preferencesProvider";
+import { Download, FolderOpen, Settings2, Loader, XCircle } from "lucide-react";
 
 export default function Home() {
   const [url, setUrl] = useState("");
   const [status, setStatus] = useState("");
+  const [eta, setEta] = useState<string>("");
+  const [size, setSize] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [speed, setSpeed] = useState<string>("");
   const [progress, setProgress] = useState<number>(0);
-  const { toast, success, error: errorToast } = useToast();
-  const { preferences, updatePreferences, isLoading } = usePreferences();
+  const { preferences, updatePreferences, prefLoading } = usePreferences();
 
   useEffect(() => {
-    if (!window.electronAPI) {
-      errorToast({ title: "Warning: NO ELECTRON API" });
-      return;
-    }
+    setTimeout(() => {
+      if (!window.electronAPI) {
+        toast.warning("NO ELECTRON API");
+        return;
+      }
 
-    window.electronAPI.onUpdateAvailable(() => {
-      setLoading(true);
-      setProgress(0);
-      setStatus("Update available. Downloading...");
-      toast({ title: "Update available. Downloading..." });
-    });
+      window.electronAPI.onUpdateAvailable(() => {
+        setLoading(true);
+        setProgress(0);
+        setStatus("Downloading update");
+        toast.info("Update available");
+      });
 
-    window.electronAPI.onUpdateProgress((percent) => {
-      setProgress(percent);
-      setStatus(`Downloading update... ${percent}%`);
-    });
+      window.electronAPI.onUpdateProgress((percent) => setProgress(percent));
 
-    window.electronAPI.onUpdateDownloaded(() => {
-      setProgress(100);
-      setStatus("Update downloaded. Installing...");
-      toast({ title: "Update downloaded. Installing..." });
-      window.electronAPI.installUpdate();
-    });
+      window.electronAPI.onUpdateDownloaded(() => {
+        setProgress(100);
+        setStatus("Installing update");
+        toast.success("Update downloaded");
+        window.electronAPI.installUpdate();
+      });
 
-    window.electronAPI.onUpdateError((error) => {
-      setLoading(false);
-      setStatus("Update error: " + error);
-      errorToast({ title: "Update failed: " + error });
-    });
+      window.electronAPI.onUpdateError((error) => {
+        setLoading(false);
+        setStatus("Update error: " + error);
+        toast.error("Update failed");
+      });
 
-    window.electronAPI.onProgress((percent) => {
-      const p = Number(percent);
-      setProgress(Number.isFinite(p) ? p : 0);
-    });
+      window.electronAPI.onProgress((percent) =>
+        setProgress(Number.isFinite(percent) ? percent : 0)
+      );
 
-    window.electronAPI.onStatus((msg) => setStatus(msg));
+      window.electronAPI.onStatus((data) => {
+        const payload = data;
+        setStatus(payload.status);
+        setProgress(
+          typeof payload.progress === "number" &&
+            Number.isFinite(payload.progress)
+            ? payload.progress
+            : 0
+        );
+        setSize(payload.size || "");
+        setSpeed(payload.speed || "");
+        setEta(payload.eta || "");
+      });
 
-    window.electronAPI.onComplete((msg) => {
-      setLoading(false);
-      setProgress(100);
-      setStatus(msg || "Done");
-      success({ title: msg || "Download complete" });
-    });
+      window.electronAPI.onComplete((msg) => {
+        setLoading(false);
+        setProgress(100);
+        setStatus(msg || "Done");
+        setEta("");
+        setSpeed("");
+        toast.success("Download complete");
+      });
 
-    window.electronAPI.onError((error) => {
-      setLoading(false);
-      errorToast({ title: error });
-      setStatus("Error: " + error);
-    });
+      window.electronAPI.onCancelled((msg) => {
+        setLoading(false);
+        setStatus(msg || "Cancelled");
+        setEta("");
+        setSpeed("");
+        setProgress(0);
+        toast.error("Download cancelled");
+      });
+
+      window.electronAPI.onError((error) => {
+        setLoading(false);
+        setStatus("Error: " + error);
+        setEta("");
+        setSpeed("");
+        toast.error("Download failed");
+      });
+    }, 0);
 
     return () => {
       window.electronAPI.removeListeners();
@@ -82,7 +117,7 @@ export default function Home() {
 
   const download = async () => {
     if (!isValidUrl(url)) {
-      errorToast({ title: "Please enter a valid URL" });
+      toast.warning("Please enter a valid URL");
       return;
     }
 
@@ -98,7 +133,7 @@ export default function Home() {
         }
       } else {
         if (!preferences.downloadLocation) {
-          errorToast({ title: "Please select a download folder first" });
+          toast.warning("Please select a download folder first");
           return;
         } else {
           filePath = `${preferences.downloadLocation}/%(title)s.%(ext)s`;
@@ -106,21 +141,20 @@ export default function Home() {
       }
 
       if (!filePath) {
-        errorToast({ title: "Download location not set" });
+        toast.error("Download location not set");
         return;
       }
 
       setLoading(true);
       setProgress(0);
       setStatus("Starting download...");
+      setSize("");
+      setEta("");
+      setSpeed("");
 
-      if (preferences.format === "mp3") {
-        window.electronAPI.downloadMp3(url, filePath);
-      } else {
-        window.electronAPI.downloadMp4(url, filePath);
-      }
+      window.electronAPI.download(url, filePath);
     } catch {
-      errorToast({ title: "Something went wrong" });
+      toast.error("Something went wrong");
     } finally {
       setUrl("");
     }
@@ -130,16 +164,16 @@ export default function Home() {
     try {
       const selectedPath = await window.electronAPI.selectDownloadLocation();
       if (selectedPath) {
-        updatePreferences({ downloadLocation: selectedPath });
-        success({ title: "Download location selected" });
+        updatePreferences({ ...preferences, downloadLocation: selectedPath });
+        toast.success("Download location selected");
       }
     } catch {
-      errorToast({ title: "Failed to select download location" });
+      toast.error("Failed to select download location");
     }
   };
 
   return (
-    <div className="h-dvh flex flex-col items-center justify-center gap-16 backgroundgradient">
+    <div className="h-dvh flex flex-col items-center justify-center gap-16">
       <div className="flex flex-col gap-1.5 w-xs sm:w-xl md:w-2xl">
         <Input
           id="url"
@@ -149,79 +183,158 @@ export default function Home() {
           onChange={(e) => setUrl(e.target.value)}
           disabled={loading}
         />
-        <Button
-          variant="outline"
-          disabled={!isValidUrl(url)}
-          onClick={download}
-          className="w-full self-end mb-3.5"
-        >
-          Download
-        </Button>
         {loading ? (
-          <div className="mt-4 flex flex-col items-center gap-2 w-full">
-            {status && <p className="text-sm text-center">{status}</p>}
-            <Progress value={progress} className="w-full" />
-            <p className="text-xs text-center">
-              {Number.isFinite(progress) ? progress.toFixed(1) : "0.0"}%
-            </p>
-          </div>
-        ) : isLoading ? (
+          <>
+            <div className="mt-2 w-full rounded-2xl border bg-background/50 backdrop-blur-md px-3.5 py-2.5">
+              <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                <span className="text-muted-foreground">Status</span>
+                <span
+                  className="text-right font-medium truncate"
+                  title={status}
+                >
+                  {status || "—"}
+                </span>
+                <span className="text-muted-foreground">Size</span>
+                <span className="text-right font-medium">{size || "—"}</span>
+                <span className="text-muted-foreground">Speed</span>
+                <span className="text-right font-medium">{speed || "—"}</span>
+                <span className="text-muted-foreground">ETA</span>
+                <span className="text-right font-medium">{eta || "—"}</span>
+                <span className="text-muted-foreground">Progress</span>
+                <span className="flex justify-end items-center gap-2">
+                  <Loader className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <span className="text-right font-medium">
+                    {Number.isFinite(progress) ? progress.toFixed(0) : "0"}%
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div className="mt-1.5 flex justify-end">
+              <Button
+                variant="outline"
+                onClick={() => window.electronAPI.cancelDownload()}
+                disabled={status === "Cancelling"}
+              >
+                <XCircle />{" "}
+                {status === "Cancelling" ? "Cancelling..." : "Cancel"}
+              </Button>
+            </div>
+          </>
+        ) : prefLoading ? (
           <div className="flex flex-col gap-2">
             <p className="text-sm text-center text-muted-foreground">
               Loading preferences...
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-1.5 items-center">
-              <span className="text-muted-foreground">Format: </span>
-              <Select
-                onValueChange={(value: "mp3" | "mp4") =>
-                  updatePreferences({ format: value })
-                }
-                value={preferences.format}
-              >
-                <SelectTrigger className="w-fit">
-                  <SelectValue placeholder="Select a format" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mp3">MP3</SelectItem>
-                  <SelectItem value="mp4">MP4</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex gap-1.5 items-center">
-              <span className="text-muted-foreground">Download: </span>
-              <Select
-                onValueChange={(value: "ask" | "choose") =>
-                  updatePreferences({ locationMode: value })
-                }
-                value={preferences.locationMode}
-              >
-                <SelectTrigger className="w-fit">
-                  <SelectValue placeholder="Select a mode" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ask">Ask Each Time</SelectItem>
-                  <SelectItem value="choose">
-                    {preferences.downloadLocation
-                      ? preferences.downloadLocation
-                      : "Choose Location"}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {preferences.locationMode === "choose" && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={chooseLocation}
-                  disabled={loading}
-                  className="h-9 px-4 py-2"
-                >
-                  <FolderOpen />
+          <div className="flex justify-end gap-1.5 w-full">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Settings2 /> Options
                 </Button>
-              )}
-            </div>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Options</DialogTitle>
+                  <DialogDescription>Settings are saved</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col gap-2">
+                  <ThemeToggle />
+                  <div className="flex gap-1.5 items-center">
+                    <span className="text-muted-foreground">Type: </span>
+                    <Select
+                      onValueChange={(value: Preferences["type"]) =>
+                        updatePreferences({ ...preferences, type: value })
+                      }
+                      value={preferences.type}
+                    >
+                      <SelectTrigger className="w-fit">
+                        <SelectValue placeholder="Select a format" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="audio">Audio</SelectItem>
+                        <SelectItem value="video">Video</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-1.5 items-center">
+                    <span className="text-muted-foreground">Download: </span>
+                    <Select
+                      onValueChange={(value: Preferences["locationMode"]) =>
+                        updatePreferences({
+                          ...preferences,
+                          locationMode: value,
+                        })
+                      }
+                      value={preferences.locationMode}
+                    >
+                      <SelectTrigger className="w-fit">
+                        <SelectValue placeholder="Select a mode" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ask">Ask (Each Time)</SelectItem>
+                        <SelectItem value="choose">
+                          {preferences.downloadLocation
+                            ? preferences.downloadLocation
+                            : "Choose Location"}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {preferences.locationMode === "choose" && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={chooseLocation}
+                        disabled={loading}
+                        className="h-9 px-4 py-2"
+                      >
+                        <FolderOpen />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-muted-foreground">Preset: </span>
+                    <Select
+                      onValueChange={(value: Preferences["preset"]) =>
+                        updatePreferences({ ...preferences, preset: value })
+                      }
+                      value={preferences.preset}
+                    >
+                      <SelectTrigger className="w-fit">
+                        <SelectValue placeholder="Select quality" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="best">Best (Highest)</SelectItem>
+                        <SelectItem value="custom">
+                          Custom (Advanced)
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {preferences.preset === "custom" &&
+                    (preferences.type === "video" ? (
+                      <VideoOptions
+                        preferences={preferences}
+                        updatePreferences={updatePreferences}
+                      />
+                    ) : (
+                      <AudioOptions
+                        preferences={preferences}
+                        updatePreferences={updatePreferences}
+                      />
+                    ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Button
+              variant="outline"
+              disabled={!isValidUrl(url)}
+              onClick={download}
+              className="self-end mb-3.5"
+            >
+              <Download /> Download
+            </Button>
           </div>
         )}
       </div>

@@ -3,7 +3,7 @@ import path from "path";
 
 const cssDir = "apps/desktop/build/out/_next/static/css";
 
-function fixFontPaths(): void {
+const fixFontPaths = (): void => {
   if (!fs.existsSync(cssDir)) {
     return;
   }
@@ -39,6 +39,6 @@ function fixFontPaths(): void {
   });
 
   console.log("Font path fixing completed!");
-}
+};
 
 fixFontPaths();

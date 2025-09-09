@@ -16,7 +16,7 @@
     "incremental": true,
     "plugins": [{ "name": "next" }],
     "paths": { "@/*": ["./src/*"] },
-    "types": ["../../packages/types/electron.d.ts"]
+    "types": ["../../packages/types/global.d.ts"]
   },
   "include": [
     "./**/*.ts",

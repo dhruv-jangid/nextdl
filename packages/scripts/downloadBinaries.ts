@@ -7,7 +7,7 @@ import { mkdir, rm } from "fs/promises";
 
 const BIN_DIR = "apps/desktop/src/binaries";
 
-async function download(url: string, dest: string): Promise<void> {
+const download = async (url: string, dest: string): Promise<void> => {
   await mkdir(BIN_DIR, { recursive: true });
 
   return new Promise((resolve, reject) => {
@@ -43,16 +43,16 @@ async function download(url: string, dest: string): Promise<void> {
 
     doRequest(url);
   });
-}
+};
 
-async function downloadYtDlp(): Promise<void> {
+const downloadYtDlp = async (): Promise<void> => {
   const url =
     "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe";
   const dest = join(BIN_DIR, "yt-dlp.exe");
   await download(url, dest);
-}
+};
 
-async function downloadFfmpeg(): Promise<void> {
+const downloadFfmpeg = async (): Promise<void> => {
   const url =
     "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip";
   const tmpZip = join(tmpdir(), "ffmpeg.zip");
@@ -72,16 +72,16 @@ async function downloadFfmpeg(): Promise<void> {
   }
 
   await rm(tmpZip);
-}
+};
 
-async function main(): Promise<void> {
+const main = async (): Promise<void> => {
   await rm(BIN_DIR, { recursive: true, force: true });
   await mkdir(BIN_DIR, { recursive: true });
 
   await downloadYtDlp();
   await downloadFfmpeg();
   console.log("All binaries downloaded into", BIN_DIR);
-}
+};
 
 main().catch((err) => {
   console.error("❌ Error:", err);

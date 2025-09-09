@@ -1,21 +1,13 @@
 "use client";
 
-import { useToast } from "./toastProvider";
+import { toast } from "sonner";
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Preferences = {
-  format: "mp3" | "mp4";
-  locationMode: "ask" | "choose";
-  downloadLocation: string;
-};
-
-type PreferencesContextType = {
+const PreferencesContext = createContext<{
   preferences: Preferences;
-  updatePreferences: (newPreferences: Partial<Preferences>) => Promise<void>;
-  isLoading: boolean;
-};
-
-const PreferencesContext = createContext<PreferencesContextType | null>(null);
+  updatePreferences: (newPreferences: Preferences) => Promise<void>;
+  prefLoading: boolean;
+} | null>(null);
 
 export const PreferencesProvider = ({
   children,
@@ -23,12 +15,16 @@ export const PreferencesProvider = ({
   children: React.ReactNode;
 }) => {
   const [preferences, setPreferences] = useState<Preferences>({
-    format: "mp3",
+    type: "audio",
     locationMode: "ask",
     downloadLocation: "",
+    preset: "custom",
+    custom: {
+      postProcessing: { audioFormat: "best", audioQuality: "best" },
+      videoFormat: { format: "bv+ba/best", mergeOutputFormat: "mp4" },
+    },
   });
-  const { error: errorToast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
+  const [prefLoading, setPrefLoading] = useState(true);
 
   useEffect(() => {
     const loadPreferences = async () => {
@@ -37,20 +33,21 @@ export const PreferencesProvider = ({
           const savedPreferences = await window.electronAPI.getPreferences();
           setPreferences(savedPreferences);
         } catch {
-          errorToast({ title: "Failed to load preferences" });
+          toast.error("Failed to load preferences");
         } finally {
-          setIsLoading(false);
+          setPrefLoading(false);
         }
       } else {
-        setIsLoading(false);
+        setPrefLoading(false);
       }
     };
 
     loadPreferences();
   }, []);
 
-  const updatePreferences = async (newPreferences: Partial<Preferences>) => {
+  const updatePreferences = async (newPreferences: Preferences) => {
     if (!window.electronAPI) {
+      toast.warning("NO ELECTRON API");
       return;
     }
 
@@ -59,7 +56,7 @@ export const PreferencesProvider = ({
       await window.electronAPI.setPreferences(newPreferences);
       setPreferences(updatedPreferences);
     } catch {
-      errorToast({ title: "Failed to update preferences" });
+      toast.error("Failed to update preferences");
     }
   };
 
@@ -68,7 +65,7 @@ export const PreferencesProvider = ({
       value={{
         preferences,
         updatePreferences,
-        isLoading,
+        prefLoading,
       }}
     >
       {children}

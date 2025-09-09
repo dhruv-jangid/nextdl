@@ -1,8 +1,7 @@
 import "server-only";
 import "@/globals.css";
 import type { Metadata } from "next";
-import { ToastProvider } from "@/components/toastProvider";
-import { PreferencesProvider } from "@/components/preferencesProvider";
+import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
   title: "NextYT - YouTube to MP3/MP4",
@@ -16,10 +15,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="dark">
-        <ToastProvider>
-          <PreferencesProvider>{children}</PreferencesProvider>
-        </ToastProvider>
+      <body>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

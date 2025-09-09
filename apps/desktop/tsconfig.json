@@ -11,7 +11,7 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "incremental": true,
-    "types": ["../../packages/types/electron.d.ts"]
+    "types": ["../../packages/types/global.d.ts"]
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "build"]

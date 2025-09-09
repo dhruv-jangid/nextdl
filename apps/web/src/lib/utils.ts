@@ -1,23 +1,5 @@
-export const smartTruncate = ({
-  text,
-  limit = 50,
-}: {
-  text: string;
-  limit?: number;
-}): string => {
-  if (text.length <= limit) {
-    return text;
-  }
-
-  const truncated = text.slice(0, limit);
-  const lastSpace = truncated.lastIndexOf(" ");
-
-  if (lastSpace > limit * 0.7) {
-    return truncated.slice(0, lastSpace) + "...";
-  }
-
-  return truncated + "...";
-};
+import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from "clsx";
 
 export const isValidUrl = (url: string) => {
   return (
@@ -25,3 +7,7 @@ export const isValidUrl = (url: string) => {
     url.startsWith("https://music.youtube.com")
   );
 };
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
