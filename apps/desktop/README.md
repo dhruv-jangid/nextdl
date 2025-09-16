@@ -14,6 +14,8 @@ A cross-platform Electron desktop application for converting YouTube videos to M
 - **Custom Download Locations**: Flexible download path management
 - **Modern UI**: Built with Electron and modern web technologies
 - **TypeScript**: Full type safety and better development experience
+- **Subtitle Options**: Multiple language support and embedding
+- **Automatic Updates**: GitHub Actions CI/CD pipeline for automated releases
 
 ## Development
 
@@ -108,7 +110,7 @@ The build process creates:
 
 ## Project Structure
 
-```
+```bash
 src/
 ├── main.ts              # Main Electron process
 ├── preload.ts           # Preload script for security

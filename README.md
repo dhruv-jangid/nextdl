@@ -4,7 +4,7 @@ A modern YouTube to MP4/MP3 converter built with Next.js and Electron, featuring
 
 ## Features
 
-**Web Application**
+### Web Application
 
 - Modern Next.js 15 interface with shadcn/ui components
 - Responsive design optimized for all devices
@@ -14,7 +14,7 @@ A modern YouTube to MP4/MP3 converter built with Next.js and Electron, featuring
 - Persistent user preferences
 - Toast notifications for user feedback
 
-**Desktop Application**
+### Desktop Application
 
 - Cross-platform Electron app for offline conversion
 - Native system integration and notifications
@@ -24,15 +24,16 @@ A modern YouTube to MP4/MP3 converter built with Next.js and Electron, featuring
 - Custom download location management
 - Advanced format selection (audio/video)
 
-**Advanced Format Options**
+### Advanced Format Options
 
 - **Audio Formats**: MP3, AAC, M4A, FLAC, ALAC, WAV, OPUS, VORBIS
 - **Video Formats**: 144p to 4320p (8K) quality options
 - **Containers**: MP4, WEBM, MKV, MOV
 - **Audio Quality**: 64k to 320k bitrate options
 - **Custom Presets**: Best quality or custom advanced settings
+- **Subtitle Options**: Multiple language support and embedding
 
-**Technical Excellence**
+### Technical Excellence
 
 - Full TypeScript implementation for type safety
 - Monorepo architecture optimized with Turborepo
@@ -40,10 +41,11 @@ A modern YouTube to MP4/MP3 converter built with Next.js and Electron, featuring
 - Cross-platform compatibility (Windows, macOS, Linux)
 - Electron Store for persistent preferences
 - Real-time progress tracking with ETA and speed
+- GitHub Actions CI/CD pipeline for automated releases
 
 ## Project Structure
 
-```
+```bash
 nextyt/
 ├── apps/
 │   ├── web/         # Next.js web application

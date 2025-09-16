@@ -14,6 +14,8 @@ A modern Next.js web application for converting YouTube videos to MP4/MP3 format
 - **Real-time Progress**: Live download progress with ETA, speed, and size tracking
 - **Toast Notifications**: User-friendly feedback with Sonner
 - **Persistent Settings**: User preferences saved across sessions
+- **Subtitle Options**: Multiple language support and embedding
+- **CI/CD Integration**: Automated builds and deployments with GitHub Actions
 
 ## Development
 
@@ -78,7 +80,7 @@ bun start
 
 ## Project Structure
 
-```
+```bash
 src/
 ├── app/                    # Next.js app directory
 │   ├── layout.tsx          # Root layout component
