@@ -8,7 +8,7 @@
     "start": "electron .",
     "dev": "bun bundle && electron .",
     "transpile": "tsc --project tsconfig.json",
-    "bundle": "esbuild src/main.ts src/preload.ts src/utils.ts --bundle --platform=node --target=node22 --outdir=build/out --format=cjs --external:electron --external:electon-builder --external:esbuild"
+    "bundle": "esbuild src/main.ts src/preload.ts --bundle --platform=node --target=node22 --outdir=build/out --format=cjs --external:electron --external:electon-builder --external:esbuild"
   },
   "dependencies": {
     "electron-store": "10.1.0",

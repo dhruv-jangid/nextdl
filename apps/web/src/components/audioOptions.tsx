@@ -6,12 +6,8 @@ import {
   SelectValue,
   SelectContent,
   SelectTrigger,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "./ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export const AudioOptions = ({
   preferences,
@@ -20,6 +16,8 @@ export const AudioOptions = ({
   preferences: Preferences;
   updatePreferences: (newPreferences: Preferences) => Promise<void>;
 }) => {
+  const { audio } = preferences;
+
   return (
     <>
       <div className="flex items-center gap-1.5">
@@ -28,16 +26,19 @@ export const AudioOptions = ({
           onValueChange={(value: any) =>
             updatePreferences({
               ...preferences,
-              custom: {
-                ...preferences.custom,
-                postProcessing: {
-                  ...preferences.custom?.postProcessing,
-                  audioFormat: value,
+              audio: {
+                ...audio,
+                custom: {
+                  ...audio.custom,
+                  postProcessing: {
+                    ...audio.custom?.postProcessing,
+                    audioFormat: value,
+                  },
                 },
               },
             })
           }
-          value={preferences.custom?.postProcessing?.audioFormat}
+          value={audio.custom?.postProcessing?.audioFormat}
         >
           <SelectTrigger className="w-fit">
             <SelectValue placeholder="Select quality" />
@@ -158,29 +159,32 @@ export const AudioOptions = ({
           </SelectContent>
         </Select>
       </div>
-      {preferences.custom?.postProcessing?.audioFormat === "mp3" && (
+      {audio.custom?.postProcessing?.audioFormat === "mp3" && (
         <div className="flex items-center gap-1.5">
           <span className="text-muted-foreground">Quality: </span>
           <Select
             onValueChange={(value: any) =>
               updatePreferences({
                 ...preferences,
-                custom: {
-                  ...preferences.custom,
-                  postProcessing: {
-                    ...preferences.custom?.postProcessing,
-                    audioQuality: value,
+                audio: {
+                  ...audio,
+                  custom: {
+                    ...audio.custom,
+                    postProcessing: {
+                      ...audio.custom?.postProcessing,
+                      audioQuality: value,
+                    },
                   },
                 },
               })
             }
-            value={preferences.custom?.postProcessing?.audioQuality}
+            value={audio.custom?.postProcessing?.audioQuality}
           >
             <SelectTrigger className="w-fit">
               <SelectValue placeholder="Select quality" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="best">Best</SelectItem>
+              <SelectItem value="0">Best</SelectItem>
               <SelectItem value="320k">320k</SelectItem>
               <SelectItem value="256K">256k</SelectItem>
               <SelectItem value="224K">224k</SelectItem>

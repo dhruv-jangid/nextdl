@@ -1,69 +1,50 @@
-export const generateArgs = ({
+export const videoArgs = ({
   preferences,
   url,
 }: {
-  preferences: Preferences;
+  preferences: VideoPreferences;
   url: string;
 }): string[] => {
   const args: string[] = [];
+  const { preset, custom } = preferences;
 
-  const FFMPEG = preferences.custom?.postProcessing?.ffmpegLocation;
-  const OUTPUTDIR = preferences.custom?.filesystem?.output;
+  // Mandatory fields validation
+  const FFMPEG = custom?.postProcessing?.ffmpegLocation;
+  const OUTPUTDIR = custom?.filesystem?.output;
   if (!FFMPEG || !OUTPUTDIR) {
-    throw new Error("FFMPEG & OUTPUTDIR are mandatory");
+    throw new Error(
+      "FFMPEG location and output directory are mandatory for custom preferences"
+    );
   }
   args.push("--ffmpeg-location", FFMPEG);
   args.push("--output", OUTPUTDIR);
 
-  // Handle preset "best" configuration based on type
-  if (preferences.preset === "best") {
-    if (preferences.type === "audio") {
-      // Best audio configuration
-      args.push("-f", "bestaudio/best");
-      args.push("--extract-audio");
-      args.push("--audio-format", "mp3");
-      args.push("--audio-quality", "0"); // Best quality
-      args.push("--embed-metadata");
-      args.push("--embed-thumbnail");
-    } else if (preferences.type === "video") {
-      // Best video configuration
-      args.push("-f", "bestvideo+bestaudio/best");
-      args.push("--merge-output-format", "mp4");
-      args.push("--embed-metadata");
-      args.push("--embed-thumbnail");
-      args.push("--embed-subs");
-      args.push("--write-subs");
-      args.push("--sub-langs", "en.*,en");
-    }
+  // Handle preset "best" configuration for video
+  if (preset === "best") {
+    args.push(
+      "-f",
+      "bestvideo+bestaudio/best",
+      "--merge-output-format",
+      "mp4",
+      "--embed-metadata",
+      "--embed-thumbnail",
+      "--embed-subs",
+      "--write-subs",
+      "--sub-langs",
+      "en.*,en",
+      "--no-playlist",
+      "--restrict-filenames",
+      "--no-overwrites"
+    );
 
-    // Common best settings for both audio and video
-    args.push("--no-playlist"); // Download single video only unless explicitly a playlist
-    args.push("--restrict-filenames"); // Safe filenames
-    args.push("--no-overwrites"); // Don't overwrite existing files
-
-    // Handle download location
-    if (preferences.locationMode === "choose" && preferences.downloadLocation) {
-      args.push("--paths", `output:${preferences.downloadLocation}`);
-    }
-
-    // Add URL and return early for "best" preset
     args.push(url);
     return args;
   }
 
-  // Custom preferences processing (only if not "best" preset)
-  if (preferences.custom) {
-    const { custom } = preferences;
-
-    // Apply type-specific defaults for custom mode
-    if (preferences.type === "audio" && !custom.postProcessing?.extractAudio) {
-      // If audio type but extract-audio not explicitly set, add it
-      args.push("--extract-audio");
-      if (!custom.postProcessing?.audioFormat) {
-        args.push("--audio-format", "mp3");
-      }
-    } else if (preferences.type === "video" && !custom.videoFormat?.format) {
-      // Default video format if not specified
+  // Custom preferences processing for video
+  if (custom) {
+    // Video-specific defaults for custom
+    if (!custom.videoFormat?.format) {
       args.push("-f", "bestvideo+bestaudio/best");
       if (!custom.videoFormat?.mergeOutputFormat) {
         args.push("--merge-output-format", "mp4");
@@ -109,7 +90,7 @@ export const generateArgs = ({
     if (custom.network) {
       const n = custom.network;
       if (n.proxy) args.push("--proxy", n.proxy);
-      if (n.socketTimeout)
+      if (n.socketTimeout !== undefined)
         args.push("--socket-timeout", n.socketTimeout.toString());
       if (n.sourceAddress) args.push("--source-address", n.sourceAddress);
       if (n.impersonate) args.push("--impersonate", n.impersonate);
@@ -143,37 +124,40 @@ export const generateArgs = ({
       if (vs.noBreakMatchFilters) args.push("--no-break-match-filters");
       if (vs.noPlaylist) args.push("--no-playlist");
       if (vs.yesPlaylist) args.push("--yes-playlist");
-      if (vs.ageLimit) args.push("--age-limit", vs.ageLimit.toString());
+      if (vs.ageLimit !== undefined)
+        args.push("--age-limit", vs.ageLimit.toString());
       if (vs.downloadArchive)
         args.push("--download-archive", vs.downloadArchive);
       if (vs.noDownloadArchive) args.push("--no-download-archive");
-      if (vs.maxDownloads)
+      if (vs.maxDownloads !== undefined)
         args.push("--max-downloads", vs.maxDownloads.toString());
       if (vs.breakOnExisting) args.push("--break-on-existing");
       if (vs.noBreakOnExisting) args.push("--no-break-on-existing");
       if (vs.breakPerInput) args.push("--break-per-input");
       if (vs.noBreakPerInput) args.push("--no-break-per-input");
-      if (vs.skipPlaylistAfterErrors)
+      if (vs.skipPlaylistAfterErrors !== undefined) {
         args.push(
           "--skip-playlist-after-errors",
           vs.skipPlaylistAfterErrors.toString()
         );
+      }
     }
 
     // DOWNLOAD OPTIONS
     if (custom.download) {
       const d = custom.download;
-      if (d.concurrentFragments)
+      if (d.concurrentFragments !== undefined) {
         args.push("--concurrent-fragments", d.concurrentFragments.toString());
+      }
       if (d.limitRate) args.push("--limit-rate", d.limitRate);
       if (d.throttledRate) args.push("--throttled-rate", d.throttledRate);
-      if (d.retries) {
+      if (d.retries !== undefined) {
         args.push(
           "--retries",
           d.retries === "infinite" ? "infinite" : d.retries.toString()
         );
       }
-      if (d.fileAccessRetries) {
+      if (d.fileAccessRetries !== undefined) {
         args.push(
           "--file-access-retries",
           d.fileAccessRetries === "infinite"
@@ -181,7 +165,7 @@ export const generateArgs = ({
             : d.fileAccessRetries.toString()
         );
       }
-      if (d.fragmentRetries) {
+      if (d.fragmentRetries !== undefined) {
         args.push(
           "--fragment-retries",
           d.fragmentRetries === "infinite"
@@ -243,7 +227,7 @@ export const generateArgs = ({
       if (f.noRestrictFilenames) args.push("--no-restrict-filenames");
       if (f.windowsFilenames) args.push("--windows-filenames");
       if (f.noWindowsFilenames) args.push("--no-windows-filenames");
-      if (f.trimFilenames)
+      if (f.trimFilenames !== undefined)
         args.push("--trim-filenames", f.trimFilenames.toString());
       if (f.noOverwrites) args.push("--no-overwrites");
       if (f.forceOverwrites) args.push("--force-overwrites");
@@ -316,7 +300,7 @@ export const generateArgs = ({
       if (v.consoleTitle) args.push("--console-title");
       if (v.progressTemplate)
         args.push("--progress-template", v.progressTemplate);
-      if (v.progressDelta)
+      if (v.progressDelta !== undefined)
         args.push("--progress-delta", v.progressDelta.toString());
       if (v.verbose) args.push("--verbose");
       if (v.dumpPages) args.push("--dump-pages");
@@ -337,47 +321,15 @@ export const generateArgs = ({
         });
       }
       if (w.bidiWorkaround) args.push("--bidi-workaround");
-      if (w.sleepRequests)
+      if (w.sleepRequests !== undefined)
         args.push("--sleep-requests", w.sleepRequests.toString());
-      if (w.sleepInterval)
+      if (w.sleepInterval !== undefined)
         args.push("--sleep-interval", w.sleepInterval.toString());
-      if (w.maxSleepInterval)
+      if (w.maxSleepInterval !== undefined) {
         args.push("--max-sleep-interval", w.maxSleepInterval.toString());
-      if (w.sleepSubtitles)
+      }
+      if (w.sleepSubtitles !== undefined)
         args.push("--sleep-subtitles", w.sleepSubtitles.toString());
-    }
-
-    // VIDEO FORMAT OPTIONS
-    if (custom.videoFormat) {
-      const vf = custom.videoFormat;
-      if (vf.format) args.push("--format", vf.format);
-      if (vf.formatSort) args.push("--format-sort", vf.formatSort);
-      if (vf.formatSortForce) args.push("--format-sort-force");
-      if (vf.noFormatSortForce) args.push("--no-format-sort-force");
-      if (vf.videoMultistreams) args.push("--video-multistreams");
-      if (vf.noVideoMultistreams) args.push("--no-video-multistreams");
-      if (vf.audioMultistreams) args.push("--audio-multistreams");
-      if (vf.noAudioMultistreams) args.push("--no-audio-multistreams");
-      if (vf.preferFreeFormats) args.push("--prefer-free-formats");
-      if (vf.noPreferFreeFormats) args.push("--no-prefer-free-formats");
-      if (vf.checkFormats) args.push("--check-formats");
-      if (vf.checkAllFormats) args.push("--check-all-formats");
-      if (vf.noCheckFormats) args.push("--no-check-formats");
-      if (vf.listFormats) args.push("--list-formats");
-      if (vf.mergeOutputFormat)
-        args.push("--merge-output-format", vf.mergeOutputFormat);
-    }
-
-    // SUBTITLE OPTIONS
-    if (custom.subtitle) {
-      const s = custom.subtitle;
-      if (s.writeSubs) args.push("--write-subs");
-      if (s.noWriteSubs) args.push("--no-write-subs");
-      if (s.writeAutoSubs) args.push("--write-auto-subs");
-      if (s.noWriteAutoSubs) args.push("--no-write-auto-subs");
-      if (s.listSubs) args.push("--list-subs");
-      if (s.subFormat) args.push("--sub-format", s.subFormat);
-      if (s.subLangs) args.push("--sub-langs", s.subLangs);
     }
 
     // AUTHENTICATION OPTIONS
@@ -398,16 +350,95 @@ export const generateArgs = ({
         args.push("--client-certificate", a.clientCertificate);
       if (a.clientCertificateKey)
         args.push("--client-certificate-key", a.clientCertificateKey);
-      if (a.clientCertificatePassword)
+      if (a.clientCertificatePassword) {
         args.push("--client-certificate-password", a.clientCertificatePassword);
+      }
+    }
+
+    // SPONSORBLOCK OPTIONS
+    if (custom.sponsorblock) {
+      const sb = custom.sponsorblock;
+      if (sb.sponsorblockMark && sb.sponsorblockMark.length > 0) {
+        args.push("--sponsorblock-mark", sb.sponsorblockMark.join(","));
+      }
+      if (sb.sponsorblockRemove && sb.sponsorblockRemove.length > 0) {
+        args.push("--sponsorblock-remove", sb.sponsorblockRemove.join(","));
+      }
+      if (sb.sponsorblockChapterTitle) {
+        args.push("--sponsorblock-chapter-title", sb.sponsorblockChapterTitle);
+      }
+      if (sb.noSponsorblock) args.push("--no-sponsorblock");
+      if (sb.sponsorblockApi)
+        args.push("--sponsorblock-api", sb.sponsorblockApi);
+    }
+
+    // EXTRACTOR OPTIONS
+    if (custom.extractor) {
+      const e = custom.extractor;
+      if (e.extractorRetries !== undefined) {
+        args.push(
+          "--extractor-retries",
+          e.extractorRetries === "infinite"
+            ? "infinite"
+            : e.extractorRetries.toString()
+        );
+      }
+      if (e.allowDynamicMpd) args.push("--allow-dynamic-mpd");
+      if (e.ignoreDynamicMpd) args.push("--ignore-dynamic-mpd");
+      if (e.hlsSplitDiscontinuity) args.push("--hls-split-discontinuity");
+      if (e.noHlsSplitDiscontinuity) args.push("--no-hls-split-discontinuity");
+      if (e.extractorArgs) {
+        Object.entries(e.extractorArgs).forEach(([key, value]) => {
+          args.push("--extractor-args", `${key}:${value}`);
+        });
+      }
+    }
+
+    // VIDEO FORMAT OPTIONS
+    if (custom.videoFormat) {
+      const vf = custom.videoFormat;
+      if (vf.format) args.push("--format", vf.format);
+      if (vf.formatSort) args.push("--format-sort", vf.formatSort);
+      if (vf.formatSortForce) args.push("--format-sort-force");
+      if (vf.noFormatSortForce) args.push("--no-format-sort-force");
+      if (vf.videoMultistreams) args.push("--video-multistreams");
+      if (vf.noVideoMultistreams) args.push("--no-video-multistreams");
+      if (vf.audioMultistreams) args.push("--audio-multistreams");
+      if (vf.noAudioMultistreams) args.push("--no-audio-multistreams");
+      if (vf.preferFreeFormats) args.push("--prefer-free-formats");
+      if (vf.noPreferFreeFormats) args.push("--no-prefer-free-formats");
+      if (vf.checkFormats) args.push("--check-formats");
+      if (vf.checkAllFormats) args.push("--check-all-formats");
+      if (vf.noCheckFormats) args.push("--no-check-formats");
+      if (vf.listFormats) args.push("--list-formats");
+      if (vf.mergeOutputFormat) {
+        args.push("--merge-output-format", vf.mergeOutputFormat);
+
+        // RE-ENCODING for MOV as appropriate codecs are required
+        if (vf.mergeOutputFormat === "mov") {
+          args.push(
+            "--postprocessor-args",
+            "ffmpeg:-c:v libx264 -c:a aac -movflags +faststart"
+          );
+        }
+      }
+    }
+
+    // SUBTITLE OPTIONS
+    if (custom.subtitle) {
+      const s = custom.subtitle;
+      if (s.writeSubs) args.push("--write-subs");
+      if (s.noWriteSubs) args.push("--no-write-subs");
+      if (s.writeAutoSubs) args.push("--write-auto-subs");
+      if (s.noWriteAutoSubs) args.push("--no-write-auto-subs");
+      if (s.listSubs) args.push("--list-subs");
+      if (s.subFormat) args.push("--sub-format", s.subFormat);
+      if (s.subLangs) args.push("--sub-langs", s.subLangs);
     }
 
     // POST-PROCESSING OPTIONS
     if (custom.postProcessing) {
       const pp = custom.postProcessing;
-      if (pp.extractAudio) args.push("--extract-audio");
-      if (pp.audioFormat) args.push("--audio-format", pp.audioFormat);
-      if (pp.audioQuality) args.push("--audio-quality", pp.audioQuality);
       if (pp.remuxVideo) args.push("--remux-video", pp.remuxVideo);
       if (pp.recodeVideo) args.push("--recode-video", pp.recodeVideo);
       if (pp.postprocessorArgs)
@@ -447,44 +478,6 @@ export const generateArgs = ({
         args.push("--use-postprocessor", pp.usePostprocessor);
     }
 
-    // SPONSORBLOCK OPTIONS
-    if (custom.sponsorblock) {
-      const sb = custom.sponsorblock;
-      if (sb.sponsorblockMark && sb.sponsorblockMark.length > 0) {
-        args.push("--sponsorblock-mark", sb.sponsorblockMark.join(","));
-      }
-      if (sb.sponsorblockRemove && sb.sponsorblockRemove.length > 0) {
-        args.push("--sponsorblock-remove", sb.sponsorblockRemove.join(","));
-      }
-      if (sb.sponsorblockChapterTitle)
-        args.push("--sponsorblock-chapter-title", sb.sponsorblockChapterTitle);
-      if (sb.noSponsorblock) args.push("--no-sponsorblock");
-      if (sb.sponsorblockApi)
-        args.push("--sponsorblock-api", sb.sponsorblockApi);
-    }
-
-    // EXTRACTOR OPTIONS
-    if (custom.extractor) {
-      const e = custom.extractor;
-      if (e.extractorRetries) {
-        args.push(
-          "--extractor-retries",
-          e.extractorRetries === "infinite"
-            ? "infinite"
-            : e.extractorRetries.toString()
-        );
-      }
-      if (e.allowDynamicMpd) args.push("--allow-dynamic-mpd");
-      if (e.ignoreDynamicMpd) args.push("--ignore-dynamic-mpd");
-      if (e.hlsSplitDiscontinuity) args.push("--hls-split-discontinuity");
-      if (e.noHlsSplitDiscontinuity) args.push("--no-hls-split-discontinuity");
-      if (e.extractorArgs) {
-        Object.entries(e.extractorArgs).forEach(([key, value]) => {
-          args.push("--extractor-args", `${key}:${value}`);
-        });
-      }
-    }
-
     // RAW OPTIONS
     if (custom.rawArgs) {
       args.push(...custom.rawArgs);
@@ -501,13 +494,7 @@ export const generateArgs = ({
     }
   }
 
-  // Handle output location based on user preferences (for custom mode)
-  if (preferences.locationMode === "choose" && preferences.downloadLocation) {
-    args.push("--paths", `output:${preferences.downloadLocation}`);
-  }
-
   // Add URL at the end
   args.push(url);
-
   return args;
 };

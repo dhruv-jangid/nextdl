@@ -1,5 +1,5 @@
-import { twMerge } from "tailwind-merge";
-import { clsx, type ClassValue } from "clsx";
+import path from "path";
+import { app } from "electron";
 
 export const isValidUrl = (url: string): boolean => {
   try {
@@ -36,6 +36,10 @@ export const isValidUrl = (url: string): boolean => {
   }
 };
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+export const getBundledBinary = (name: string) => {
+  if (!app.isPackaged) {
+    return path.join(__dirname, "../../src/binaries", name);
+  } else {
+    return path.join(process.resourcesPath, "binaries", name);
+  }
+};

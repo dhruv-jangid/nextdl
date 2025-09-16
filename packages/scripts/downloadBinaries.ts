@@ -52,7 +52,7 @@ const downloadYtDlp = async (): Promise<void> => {
   await download(url, dest);
 };
 
-const downloadFfmpeg = async (): Promise<void> => {
+const downloadFFmpeg = async (): Promise<void> => {
   const url =
     "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip";
   const tmpZip = join(tmpdir(), "ffmpeg.zip");
@@ -79,7 +79,7 @@ const main = async (): Promise<void> => {
   await mkdir(BIN_DIR, { recursive: true });
 
   await downloadYtDlp();
-  await downloadFfmpeg();
+  await downloadFFmpeg();
   console.log("All binaries downloaded into", BIN_DIR);
 };
 

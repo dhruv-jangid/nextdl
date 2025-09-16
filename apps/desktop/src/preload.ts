@@ -35,4 +35,4 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getPreferences: () => ipcRenderer.invoke("getPreferences"),
   setPreferences: (preferences: any) =>
     ipcRenderer.invoke("setPreferences", preferences),
-} satisfies Window["electronAPI"]);
+} as Window["electronAPI"]);

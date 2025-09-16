@@ -1,10 +1,11 @@
 import path from "path";
 import Store from "electron-store";
-import { generateArgs } from "./generateArgs";
+import { audioArgs } from "./lib/audioArgs";
+import { videoArgs } from "./lib/videoArgs";
 import { autoUpdater } from "electron-updater";
 import { spawn, ChildProcess } from "child_process";
-import { getBundledBinary, isValidUrl } from "./utils";
-import { app, BrowserWindow, ipcMain, dialog } from "electron/main";
+import { getBundledBinary, isValidUrl } from "./lib/utils";
+import { app, BrowserWindow, ipcMain, dialog, Menu } from "electron/main";
 
 let mainWindow: BrowserWindow;
 let currentDownloadProc: ChildProcess | null = null;
@@ -18,13 +19,27 @@ const store = new Store<Preferences>({
     type: "audio",
     locationMode: "ask",
     downloadLocation: "",
-    preset: "best",
-    custom: {
-      videoFormat: { format: "bv+ba/best", mergeOutputFormat: "mp4" },
-      postProcessing: {
-        audioFormat: "best",
-        audioQuality: "best",
-        ffmpegLocation: FFMPEG,
+    audio: {
+      preset: "best",
+      custom: {
+        postProcessing: {
+          extractAudio: true,
+          audioFormat: "best",
+          audioQuality: "best",
+          ffmpegLocation: FFMPEG,
+        },
+      },
+    },
+    video: {
+      preset: "best",
+      custom: {
+        videoFormat: {
+          format: "bv+ba/best",
+          mergeOutputFormat: "mp4",
+        },
+        postProcessing: {
+          ffmpegLocation: FFMPEG,
+        },
       },
     },
   },
@@ -36,9 +51,23 @@ const createWindow = () => {
     height: 800,
     autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, "preload.js") },
+    center: true,
   });
 
   mainWindow.loadFile(path.join(__dirname, "index.html"));
+
+  const menu = Menu.buildFromTemplate([
+    {
+      label: "Edit",
+      submenu: [
+        { role: "copy" },
+        { role: "paste" },
+        { role: "undo" },
+        { role: "redo" },
+      ],
+    },
+  ]);
+  Menu.setApplicationMenu(menu);
 
   mainWindow.once("ready-to-show", () => {
     autoUpdater.checkForUpdatesAndNotify();
@@ -110,14 +139,14 @@ ipcMain.handle(
   }
 );
 
-ipcMain.handle("getPreferences", () => {
+ipcMain.handle("getPreferences", (): Preferences => {
   return {
     type: store.get("type"),
     locationMode: store.get("locationMode"),
     downloadLocation: store.get("downloadLocation"),
-    preset: store.get("preset"),
-    custom: store.get("custom"),
-  } as Preferences;
+    audio: store.get("audio"),
+    video: store.get("video"),
+  };
 });
 
 ipcMain.handle("setPreferences", (_event, newPreferences: Preferences) => {
@@ -125,23 +154,36 @@ ipcMain.handle("setPreferences", (_event, newPreferences: Preferences) => {
     type: store.get("type"),
     locationMode: store.get("locationMode"),
     downloadLocation: store.get("downloadLocation"),
-    preset: store.get("preset"),
-    custom: store.get("custom"),
-  } as Preferences;
+    audio: store.get("audio"),
+    video: store.get("video"),
+  };
 
   const merged: Preferences = {
     ...current,
     ...newPreferences,
-    custom: { ...current.custom, ...newPreferences.custom },
+    audio: {
+      ...current.audio,
+      ...newPreferences.audio,
+      custom: {
+        ...current.audio?.custom,
+        ...newPreferences.audio?.custom,
+      },
+    },
+    video: {
+      ...current.video,
+      ...newPreferences.video,
+      custom: {
+        ...current.video?.custom,
+        ...newPreferences.video?.custom,
+      },
+    },
   };
 
   store.set("type", merged.type);
   store.set("locationMode", merged.locationMode);
   store.set("downloadLocation", merged.downloadLocation);
-  store.set("preset", merged.preset);
-  if (merged.custom) {
-    store.set("custom", merged.custom);
-  }
+  store.set("audio", merged.audio);
+  store.set("video", merged.video);
 
   return true;
 });
@@ -159,7 +201,6 @@ ipcMain.on("download", (event, url, filePath) => {
     event.reply("download-error", "Invalid URL");
     return;
   }
-
   if (!filePath) {
     event.reply("download-error", "No save location selected");
     return;
@@ -174,19 +215,35 @@ ipcMain.on("download", (event, url, filePath) => {
     outTemplate = path.join(downloadDir, filename + ".%(ext)s");
   }
 
-  const preferences: Preferences = {
+  const { type, audio, video }: Preferences = {
     type: store.get("type"),
-    downloadLocation: store.get("downloadLocation"),
     locationMode: store.get("locationMode"),
-    preset: store.get("preset"),
-    custom: { ...store.get("custom"), filesystem: { output: outTemplate } },
+    downloadLocation: store.get("downloadLocation"),
+    audio: store.get("audio"),
+    video: store.get("video"),
+  };
+
+  const active = type === "audio" ? audio : video;
+
+  const merged = {
+    ...active,
+    custom: {
+      ...(active.custom ?? {}),
+      filesystem: {
+        ...(active.custom?.filesystem ?? {}),
+        output: outTemplate,
+      },
+    },
   };
 
   let proc;
   try {
-    proc = spawn(YT_DLP, generateArgs({ preferences, url }), {
-      windowsHide: true,
-    });
+    const args =
+      type === "audio"
+        ? audioArgs({ preferences: merged, url })
+        : videoArgs({ preferences: merged, url });
+
+    proc = spawn(YT_DLP, args, { windowsHide: true });
   } catch (error) {
     if (error instanceof Error) {
       event.reply("download-error", `Failed to spawn yt-dlp: ${error.message}`);
@@ -200,11 +257,11 @@ ipcMain.on("download", (event, url, filePath) => {
   wasCancelled = false;
 
   let lastPercent = -1;
-  const handleChunk = (chunk: { toString: () => any }) => {
+  const handleChunk = (chunk: Buffer) => {
     if (!mainWindow) return;
 
     const raw = chunk.toString();
-    let cleaned = raw
+    const cleaned = raw
       .replace(/\x1B\[[0-?]*[ -\/]*[@-~]/g, "")
       .replace(/\r/g, "\n");
     const lines = cleaned.split(/\n/);
@@ -232,9 +289,10 @@ ipcMain.on("download", (event, url, filePath) => {
       );
 
       let status = lineWithoutBracket;
-      if (/Destination:/i.test(lineWithoutBracket)) status = "Preparing";
-      else if (/ETA/i.test(lineWithoutBracket)) status = "Downloading";
-      else if (/100%/i.test(lineWithoutBracket)) status = "Finalizing";
+      if (/ETA/i.test(lineWithoutBracket)) status = "Downloading";
+      else if (/Merger/i.test(lineWithoutBracket)) status = "Merging";
+      else if (/Deleting/i.test(lineWithoutBracket)) status = "Finalizing";
+      else status = "Preparing";
 
       const statusPayload: DownloadStatus = {
         status,

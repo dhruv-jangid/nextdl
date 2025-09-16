@@ -6,12 +6,8 @@ import {
   SelectValue,
   SelectContent,
   SelectTrigger,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "./ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export const VideoOptions = ({
   preferences,
@@ -20,20 +16,25 @@ export const VideoOptions = ({
   preferences: Preferences;
   updatePreferences: (newPreferences: Preferences) => Promise<void>;
 }) => {
+  const { video } = preferences;
+
   return (
     <>
       <div className="flex items-center gap-1.5">
         <span className="text-muted-foreground">Quality: </span>
         <Select
-          value={preferences.custom?.videoFormat?.format}
+          value={video.custom?.videoFormat?.format}
           onValueChange={(value: any) =>
             updatePreferences({
               ...preferences,
-              custom: {
-                ...preferences.custom,
-                videoFormat: {
-                  ...preferences.custom?.videoFormat,
-                  format: value,
+              video: {
+                ...video,
+                custom: {
+                  ...video.custom,
+                  videoFormat: {
+                    ...video.custom?.videoFormat,
+                    format: value,
+                  },
                 },
               },
             })
@@ -152,16 +153,19 @@ export const VideoOptions = ({
           onValueChange={(value: any) =>
             updatePreferences({
               ...preferences,
-              custom: {
-                ...preferences.custom,
-                videoFormat: {
-                  ...preferences.custom?.videoFormat,
-                  mergeOutputFormat: value,
+              video: {
+                ...video,
+                custom: {
+                  ...video.custom,
+                  videoFormat: {
+                    ...video.custom?.videoFormat,
+                    mergeOutputFormat: value,
+                  },
                 },
               },
             })
           }
-          value={preferences.custom?.videoFormat?.mergeOutputFormat}
+          value={video.custom?.videoFormat?.mergeOutputFormat}
         >
           <SelectTrigger className="w-fit">
             <SelectValue placeholder="Select container" />
@@ -177,6 +181,7 @@ export const VideoOptions = ({
                 </p>
                 <p>Size: Small</p>
                 <p>Compatibility: Excellent</p>
+                <p>Processing Mode: Remux (Fast)</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -189,6 +194,7 @@ export const VideoOptions = ({
                 </p>
                 <p>Size: Small</p>
                 <p>Compatibility: Good</p>
+                <p>Processing Mode: Remux (Fast)</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -201,6 +207,7 @@ export const VideoOptions = ({
                 </p>
                 <p>Size: Medium</p>
                 <p>Compatibility: Moderate</p>
+                <p>Processing Mode: Remux (Fast)</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -213,6 +220,10 @@ export const VideoOptions = ({
                 </p>
                 <p>Size: Large</p>
                 <p>Compatibility: Excellent</p>
+                <p>Processing Mode: Re-encode</p>
+                <p className="text-red-600">
+                  Note: Slow, Resource Heavy, Slows down PC
+                </p>
               </TooltipContent>
             </Tooltip>
           </SelectContent>

@@ -1,6 +1,6 @@
 {
   "name": "nextyt",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "author": "dhruvjangid",
   "description": "YouTube to MP4/MP3",
@@ -26,9 +26,9 @@
   "dependencies": {},
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
-    "@types/node": "^24.3.1",
+    "@types/node": "^24.5.0",
     "adm-zip": "^0.5.16",
-    "fs-extra": "^11.3.1",
+    "fs-extra": "^11.3.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
     "turbo": "^2.5.6",

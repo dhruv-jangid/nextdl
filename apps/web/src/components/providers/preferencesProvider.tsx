@@ -18,10 +18,24 @@ export const PreferencesProvider = ({
     type: "audio",
     locationMode: "ask",
     downloadLocation: "",
-    preset: "custom",
-    custom: {
-      postProcessing: { audioFormat: "best", audioQuality: "best" },
-      videoFormat: { format: "bv+ba/best", mergeOutputFormat: "mp4" },
+    audio: {
+      preset: "best",
+      custom: {
+        postProcessing: {
+          extractAudio: true,
+          audioFormat: "best",
+          audioQuality: "0",
+        },
+      },
+    },
+    video: {
+      preset: "best",
+      custom: {
+        videoFormat: {
+          format: "bv+ba/best",
+          mergeOutputFormat: "mp4",
+        },
+      },
     },
   });
   const [prefLoading, setPrefLoading] = useState(true);
