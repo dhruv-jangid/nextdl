@@ -1,52 +1,55 @@
-# NextYT
+# NextDL
 
-A modern YouTube to MP4/MP3 converter built with Next.js and Electron, featuring a beautiful web interface and cross-platform desktop application with advanced customization options.
+NextDL is a modern content downloader for YouTube and Instagram built with Next.js and Electron. It features a responsive web interface and cross-platform desktop application with advanced customization options.
 
-## Features
+## Key Features
+
+### Platform Support
+
+- Download from **YouTube** videos, shorts, and playlists
+- Download from **Instagram** posts, reels, and TV content
+- Cross-platform support for Windows, macOS, and Linux
 
 ### Web Application
 
 - Modern Next.js 15 interface with shadcn/ui components
-- Responsive design optimized for all devices
+- Responsive design for all devices
 - Real-time conversion status and progress tracking
-- Advanced audio/video format options with tooltips
-- Theme toggle (light/dark mode)
+- Advanced audio/video format options
+- Light/dark mode theme toggle
 - Persistent user preferences
 - Toast notifications for user feedback
 
 ### Desktop Application
 
-- Cross-platform Electron app for offline conversion
-- Native system integration and notifications
-- Standalone operation without internet dependency
-- Auto-updater with seamless update experience
+- Offline operation without internet dependency
+- Automatic updates with seamless experience
 - Bundled yt-dlp and FFmpeg binaries
 - Custom download location management
-- Advanced format selection (audio/video)
+- Native system integration and notifications
 
-### Advanced Format Options
+### Media Format Support
 
 - **Audio Formats**: MP3, AAC, M4A, FLAC, ALAC, WAV, OPUS, VORBIS
-- **Video Formats**: 144p to 4320p (8K) quality options
-- **Containers**: MP4, WEBM, MKV, MOV
-- **Audio Quality**: 64k to 320k bitrate options
-- **Custom Presets**: Best quality or custom advanced settings
-- **Subtitle Options**: Multiple language support and embedding
+- **Video Formats**: Resolution options from 144p to 4320p (8K)
+- **Container Formats**: MP4, WEBM, MKV, MOV
+- **Audio Quality**: Bitrate options from 64k to 320k
+- **Custom Settings**: Presets for best quality or advanced custom options
+- **Subtitle Support**: Multiple language options and embedding
 
-### Technical Excellence
+### Technical Architecture
 
 - Full TypeScript implementation for type safety
-- Monorepo architecture optimized with Turborepo
-- Modern UI framework with TailwindCSS 4 and shadcn/ui
-- Cross-platform compatibility (Windows, macOS, Linux)
-- Electron Store for persistent preferences
-- Real-time progress tracking with ETA and speed
-- GitHub Actions CI/CD pipeline for automated releases
+- Monorepo architecture with Turborepo
+- Modern UI with TailwindCSS 4 and shadcn/ui components
+- Persistent storage with Electron Store
+- Real-time progress tracking with ETA and speed indicators
+- Automated releases via GitHub Actions CI/CD pipeline
 
 ## Project Structure
 
 ```bash
-nextyt/
+nextdl/
 ├── apps/
 │   ├── web/         # Next.js web application
 │   └── desktop/     # Electron desktop application
@@ -110,16 +113,17 @@ bun build:desktop  # Build desktop application
 - `bun check-types` - Check TypeScript types across all apps
 - `bun cleanall` - Clean all build artifacts and node_modules
 - `bun publish` - Build and publish desktop application
+- `bun down` - Download required binaries for desktop app
 
-## Technologies Used
+## Technology Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript
 - **Styling**: TailwindCSS 4, shadcn/ui components, Radix UI
 - **Desktop**: Electron 37, esbuild, electron-builder
 - **State Management**: React Context, Electron Store
-- **Notifications**: Sonner (toast notifications)
+- **Notifications**: Sonner toast notifications
 - **Icons**: Lucide React
 - **Build System**: Turborepo, Bun
 - **Package Manager**: Bun 1.2.21
-- **Video Processing**: yt-dlp, FFmpeg (bundled)
-- **Auto-updater**: electron-updater
+- **Media Processing**: yt-dlp, FFmpeg (bundled)
+- **Updates**: electron-updater

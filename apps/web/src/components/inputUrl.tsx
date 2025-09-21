@@ -42,7 +42,7 @@ export const InputUrl = ({
       <ContextMenuTrigger>
         <Input
           id="url"
-          placeholder="https://youtu.be/..."
+          placeholder="Enter or Paste YouTube/Instagram URL here"
           className="font-mono"
           value={url}
           onChange={(e) => setUrl(e.target.value)}

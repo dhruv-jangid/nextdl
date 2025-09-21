@@ -1,11 +1,11 @@
-appId: com.dhruvjangid.nextyt
-productName: NextYT
+appId: com.dhruvjangid.nextdl
+productName: NextDL
 
 extraMetadata:
-  name: nextyt
-  version: 2.2.0
+  name: nextdl
+  version: 2.3.0
   author: dhruvjangid
-  description: YouTube to MP4/MP3
+  description: YouTube & Instagram Content Downloader
 
 directories:
   output: build/dist
@@ -35,5 +35,5 @@ linux:
 publish:
   - provider: github
     owner: dhruv-jangid
-    repo: nextyt
+    repo: nextdl
     token: ${env.GH_TOKEN}

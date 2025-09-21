@@ -1,21 +1,22 @@
 # Desktop Application
 
-A cross-platform Electron desktop application for converting YouTube videos to MP4/MP3 format. Built with TypeScript and Electron for optimal performance, featuring auto-updates, bundled binaries, and advanced format options.
+A cross-platform Electron desktop application for downloading content from YouTube and Instagram. Features offline conversion, automatic updates, and a modern UI built with React and Electron.
 
 ## Features
 
-- **Cross-Platform**: Works on Windows, macOS, and Linux
-- **Offline Conversion**: Convert videos without internet dependency using bundled binaries
-- **Auto-Updater**: Seamless automatic updates with electron-updater
-- **Bundled Binaries**: Includes yt-dlp and FFmpeg for standalone operation
-- **Advanced Format Options**: Comprehensive audio/video format selection
-- **Real-time Progress**: Live download progress with ETA, speed, and size tracking
-- **Persistent Preferences**: User settings saved with Electron Store
-- **Custom Download Locations**: Flexible download path management
-- **Modern UI**: Built with Electron and modern web technologies
-- **TypeScript**: Full type safety and better development experience
+- **Platform Support**: Download from YouTube and Instagram
+- **Content Types**: Videos, shorts, reels, posts, and TV content
+- **Cross-Platform**: Windows, macOS, and Linux support
+- **Offline Conversion**: Built-in yt-dlp and FFmpeg binaries
+- **Automatic Updates**: Self-updating application via GitHub releases
+- **Modern UI**: Built with React and Electron
+- **Format Options**: MP4 video and MP3 audio conversion
+- **Progress Tracking**: Real-time download progress with ETA and speed
+- **Persistent Settings**: User preferences saved across sessions
 - **Subtitle Options**: Multiple language support and embedding
-- **Automatic Updates**: GitHub Actions CI/CD pipeline for automated releases
+- **Custom Save Location**: Choose where to save downloaded content
+- **Tray Integration**: Minimize to system tray for background operation
+- **Notifications**: Native OS notifications for completed downloads
 
 ## Development
 
@@ -34,94 +35,88 @@ bun install
 
 ### Development Mode
 
-Start the application in development mode:
+Start the development server:
 
 ```bash
 bun dev
 ```
 
-This will bundle the TypeScript files and launch the Electron application.
+This starts the Electron application in development mode with hot reload.
 
 ### Building
 
-Build the application for distribution:
+Build the application for production:
 
 ```bash
 bun build
 ```
 
-This creates a distributable package using electron-builder.
+### Releasing
 
-### Publishing
-
-Build and publish the application:
+Create a production-ready distributable:
 
 ```bash
-bun publish
+bun release
 ```
 
 ## Available Scripts
 
-- `bun dev` - Start in development mode (bundle + launch)
-- `bun build` - Build the application for distribution
-- `bun publish` - Build and publish the application
-- `bun start` - Launch the built application
-- `bun bundle` - Bundle TypeScript files with esbuild
-- `bun transpile` - Transpile TypeScript to JavaScript
+- `bun dev` - Start development mode with hot reload
+- `bun build` - Build for production
+- `bun release` - Create distributable packages
+- `bun lint` - Run ESLint
 
 ## Bundled Binaries
 
-The application includes pre-compiled binaries for offline operation:
+The application bundles the following binaries:
 
-- **yt-dlp**: Latest YouTube downloader for video/audio extraction
-- **FFmpeg**: Audio/video processing and conversion
-- **FFprobe**: Media file analysis and metadata extraction
+- **yt-dlp**: For downloading content from YouTube and Instagram
+- **FFmpeg**: For media conversion and processing
 
-Binaries are automatically downloaded during the build process and bundled with the application.
+These binaries are automatically downloaded during the build process and packaged with the application.
 
-## Auto-Updater
+## Automatic Updates
 
-The desktop application features automatic updates:
-
-- **Check for Updates**: Automatically checks for new versions on startup
-- **Background Download**: Downloads updates in the background
-- **Seamless Installation**: Installs updates and restarts the application
-- **Progress Tracking**: Real-time update progress with user feedback
-- **Error Handling**: Graceful error handling for update failures
+The application includes an automatic update system that checks for new releases on GitHub and updates itself when a new version is available. This is implemented using Electron's autoUpdater module.
 
 ## Build Output
 
-The build process creates:
+The build process creates distributable packages for:
 
-- `build/out/` - Bundled application files
-- Distribution packages for different platforms
-- Auto-updater configuration for seamless updates
+- Windows (.exe, .msi)
+- macOS (.dmg)
+- Linux (.AppImage, .deb, .rpm)
 
 ## Technologies
 
-- **Runtime**: Electron 37
+- **Framework**: Electron
+- **UI Library**: React
 - **Language**: TypeScript
-- **Bundler**: esbuild
-- **Builder**: electron-builder
-- **Auto-updater**: electron-updater
-- **Storage**: electron-store
-- **Video Processing**: yt-dlp, FFmpeg
+- **Styling**: TailwindCSS
+- **Components**: shadcn/ui, Radix UI
+- **State Management**: React Context API
+- **Storage**: Electron Store
+- **Packaging**: Electron Builder
+- **CI/CD Pipeline**: GitHub Actions for automated releases
 - **Package Manager**: Bun
 
 ## Project Structure
 
 ```bash
 src/
-├── main.ts              # Main Electron process
-├── preload.ts           # Preload script for security
-├── utils.ts             # Utility functions
-├── generateArgs.ts      # yt-dlp argument generation
-├── binaries/            # Bundled binaries
-│   ├── ffmpeg.exe       # FFmpeg binary (Windows)
-│   ├── ffprobe.exe      # FFprobe binary (Windows)
-│   └── yt-dlp.exe       # yt-dlp binary (Windows)
-└── icons/               # Application icons
-    ├── icon.ico         # Windows icon
-    ├── icon.icns        # macOS icon
-    └── icon.png         # PNG icon
+├── main/                   # Electron main process
+│   ├── main.ts             # Main entry point
+│   ├── preload.ts          # Preload script
+│   └── utils.ts            # Utility functions
+├── renderer/               # Electron renderer process
+│   ├── components/         # UI components
+│   ├── hooks/              # Custom React hooks
+│   ├── pages/              # Application pages
+│   └── App.tsx             # Main React component
+├── shared/                 # Shared between main and renderer
+│   ├── constants.ts        # Application constants
+│   └── types.ts            # TypeScript type definitions
+└── utils/                  # Utility functions
+    ├── downloadBinaries.ts # Binary downloader
+    └── validators.ts       # Input validation
 ```

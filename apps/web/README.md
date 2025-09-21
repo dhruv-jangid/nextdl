@@ -1,12 +1,14 @@
 # Web Application
 
-A modern Next.js web application for converting YouTube videos to MP4/MP3 format. Features a beautiful, responsive interface built with shadcn/ui components, advanced format options, and real-time progress tracking.
+A modern Next.js web application for downloading content from YouTube and Instagram. Features a responsive interface built with shadcn/ui components, advanced format options, and real-time progress tracking.
 
 ## Features
 
+- **Platform Support**: Download from YouTube and Instagram
+- **Content Types**: Videos, shorts, reels, posts, and TV content
 - **Modern UI**: Built with Next.js 15 and React 19
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Component Library**: Beautiful UI components from shadcn/ui and Radix UI
+- **Component Library**: UI components from shadcn/ui and Radix UI
 - **TypeScript**: Full type safety and enhanced developer experience
 - **Fast Development**: Hot reload and optimized build process with Turbopack
 - **Theme Support**: Light/dark mode toggle with persistent preferences
@@ -98,37 +100,4 @@ src/
 │   ├── audioOptions.tsx    # Audio format options
 │   ├── videoOptions.tsx    # Video format options
 │   ├── themeToggle.tsx     # Theme switcher
-│   └── providers.tsx       # Provider wrapper
-├── lib/                    # Utility libraries
-│   └── utils.ts            # Utility functions
-└── globals.css             # Global styles
 ```
-
-## UI Components
-
-The application uses shadcn/ui and Radix UI components for a consistent and beautiful design:
-
-- **Button**: Multiple variants (default, outline, ghost)
-- **Input**: Text input with validation and styling
-- **Select**: Dropdown selection with search
-- **Dialog**: Modal dialogs for settings and options
-- **Tooltip**: Contextual help and information
-- **Toast**: Notification system with Sonner
-- **Theme Toggle**: Light/dark mode switcher
-
-## Advanced Features
-
-- **Format Options**: Comprehensive audio/video format selection with tooltips
-- **Progress Tracking**: Real-time download progress with ETA and speed
-- **Preferences**: Persistent user settings with Electron Store
-- **Theme Support**: System-aware theme switching
-- **Responsive Design**: Mobile-first responsive layout
-
-## Development Features
-
-- **Turbopack**: Fast development server with Next.js 15
-- **Hot Reload**: Instant feedback during development
-- **TypeScript**: Compile-time error checking and type safety
-- **ESLint**: Code quality and consistency
-- **TailwindCSS 4**: Utility-first CSS framework
-- **Component Library**: Reusable UI components with shadcn/ui

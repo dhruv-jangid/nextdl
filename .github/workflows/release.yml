@@ -1,4 +1,4 @@
-name: Build & Release NextYT
+name: Build & Release NextDL
 
 on:
   push:
