@@ -26,7 +26,6 @@ const store = new Store<Preferences>({
           extractAudio: true,
           audioFormat: "best",
           audioQuality: "best",
-          ffmpegLocation: FFMPEG,
         },
       },
     },
@@ -36,9 +35,6 @@ const store = new Store<Preferences>({
         videoFormat: {
           format: "bv+ba/best",
           mergeOutputFormat: "mp4",
-        },
-        postProcessing: {
-          ffmpegLocation: FFMPEG,
         },
       },
     },
@@ -56,18 +52,20 @@ const createWindow = () => {
 
   mainWindow.loadFile(path.join(__dirname, "index.html"));
 
-  const menu = Menu.buildFromTemplate([
-    {
-      label: "Edit",
-      submenu: [
-        { role: "copy" },
-        { role: "paste" },
-        { role: "undo" },
-        { role: "redo" },
-      ],
-    },
-  ]);
-  Menu.setApplicationMenu(menu);
+  if (app.isPackaged) {
+    const menu = Menu.buildFromTemplate([
+      {
+        label: "Edit",
+        submenu: [
+          { role: "copy" },
+          { role: "paste" },
+          { role: "undo" },
+          { role: "redo" },
+        ],
+      },
+    ]);
+    Menu.setApplicationMenu(menu);
+  }
 
   mainWindow.once("ready-to-show", () => {
     autoUpdater.checkForUpdatesAndNotify();
@@ -223,25 +221,44 @@ ipcMain.on("download", (event, url, filePath) => {
     video: store.get("video"),
   };
 
-  const active = type === "audio" ? audio : video;
-
-  const merged = {
-    ...active,
-    custom: {
-      ...(active.custom ?? {}),
-      filesystem: {
-        ...(active.custom?.filesystem ?? {}),
-        output: outTemplate,
-      },
-    },
-  };
-
   let proc;
   try {
     const args =
       type === "audio"
-        ? audioArgs({ preferences: merged, url })
-        : videoArgs({ preferences: merged, url });
+        ? audioArgs({
+            preferences: {
+              ...audio,
+              custom: {
+                ...audio.custom,
+                filesystem: {
+                  ...audio.custom?.filesystem,
+                  output: outTemplate,
+                },
+                postProcessing: {
+                  ...audio.custom?.postProcessing,
+                  ffmpegLocation: FFMPEG,
+                },
+              },
+            },
+            url,
+          })
+        : videoArgs({
+            preferences: {
+              ...video,
+              custom: {
+                ...video.custom,
+                filesystem: {
+                  ...video.custom?.filesystem,
+                  output: outTemplate,
+                },
+                postProcessing: {
+                  ...video.custom?.postProcessing,
+                  ffmpegLocation: FFMPEG,
+                },
+              },
+            },
+            url,
+          });
 
     proc = spawn(YT_DLP, args, { windowsHide: true });
   } catch (error) {
@@ -292,7 +309,7 @@ ipcMain.on("download", (event, url, filePath) => {
       if (/ETA/i.test(lineWithoutBracket)) status = "Downloading";
       else if (/Merger/i.test(lineWithoutBracket)) status = "Merging";
       else if (/Deleting/i.test(lineWithoutBracket)) status = "Finalizing";
-      else status = "Preparing";
+      else status = "...";
 
       const statusPayload: DownloadStatus = {
         status,

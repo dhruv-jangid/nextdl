@@ -176,7 +176,8 @@ export const audioArgs = ({
       if (d.xattrSetFilesize) args.push("--xattr-set-filesize");
       if (d.hlsUseMpegts) args.push("--hls-use-mpegts");
       if (d.noHlsUseMpegts) args.push("--no-hls-use-mpegts");
-      if (d.downloadSections) args.push("--download-sections", d.downloadSections);
+      if (d.downloadSections)
+        args.push("--download-sections", d.downloadSections);
       if (d.downloader) args.push("--downloader", d.downloader);
       if (d.downloaderArgs) args.push("--downloader-args", d.downloaderArgs);
     }
@@ -206,7 +207,8 @@ export const audioArgs = ({
       if (fs.writeInfoJson) args.push("--write-info-json");
       if (fs.noWriteInfoJson) args.push("--no-write-info-json");
       if (fs.writePlaylistMetafiles) args.push("--write-playlist-metafiles");
-      if (fs.noWritePlaylistMetafiles) args.push("--no-write-playlist-metafiles");
+      if (fs.noWritePlaylistMetafiles)
+        args.push("--no-write-playlist-metafiles");
       if (fs.cleanInfoJson) args.push("--clean-info-json");
       if (fs.noCleanInfoJson) args.push("--no-clean-info-json");
       if (fs.writeComments) args.push("--write-comments");

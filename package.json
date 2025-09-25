@@ -1,6 +1,6 @@
 {
   "name": "nextdl",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "private": true,
   "author": "dhruvjangid",
   "description": "YouTube & Instagram Content Downloader",
@@ -30,8 +30,8 @@
     "adm-zip": "^0.5.16",
     "fs-extra": "^11.3.2",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.6",
-    "turbo": "^2.5.6",
+    "lint-staged": "^16.2.1",
+    "turbo": "^2.5.8",
     "typescript": "^5.9.2"
   },
   "lint-staged": {
