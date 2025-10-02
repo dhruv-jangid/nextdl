@@ -7,7 +7,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("update-progress", (_e, pct) => cb(pct)),
   onUpdateError: (cb) => ipcRenderer.on("update-error", (_e, err) => cb(err)),
   installUpdate: () => ipcRenderer.send("install-update"),
-  selectDownloadLocation: () => ipcRenderer.invoke("selectDownloadLocation"),
+  chooseFolder: () => ipcRenderer.invoke("chooseFolder"),
   showSaveDialog: (defaultName: string, fileExtension: string) =>
     ipcRenderer.invoke("showSaveDialog", defaultName, fileExtension),
   download: (url, filePath?: string) =>
@@ -35,4 +35,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getPreferences: () => ipcRenderer.invoke("getPreferences"),
   setPreferences: (preferences: any) =>
     ipcRenderer.invoke("setPreferences", preferences),
+  openLink: (url: string) => ipcRenderer.invoke("openLink", url),
 } as Window["electronAPI"]);

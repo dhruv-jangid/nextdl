@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { Loading } from "@/components/loading";
 import { Options } from "@/components/options";
 import { Button } from "@/components/ui/button";
-import { InputUrl } from "@/components/inputUrl";
+import { InputUrl } from "@/components/input-url";
 import { usePreferences } from "@/components/providers/preferencesProvider";
 
 export default function Home() {
@@ -17,7 +17,7 @@ export default function Home() {
   const [size, setSize] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [speed, setSpeed] = useState<string>("");
-  const [updating, setUpdating] = useState(false);
+  const [isUpdate, setIsUpdate] = useState(false);
   const [progress, setProgress] = useState<number>(0);
   const { preferences, prefLoading } = usePreferences();
 
@@ -30,7 +30,7 @@ export default function Home() {
 
       window.electronAPI.onUpdateAvailable(() => {
         setLoading(true);
-        setUpdating(true);
+        setIsUpdate(true);
         setProgress(0);
         setStatus("Downloading update");
         toast.info("Update available");
@@ -47,7 +47,7 @@ export default function Home() {
 
       window.electronAPI.onUpdateError((error) => {
         setLoading(false);
-        setUpdating(false);
+        setIsUpdate(false);
         setStatus("Update error: " + error);
         toast.error("Update failed");
       });
@@ -110,20 +110,20 @@ export default function Home() {
 
     try {
       let filePath: string | null = null;
-      const { locationMode, downloadLocation } = preferences;
-      if (locationMode === "ask") {
-        const selectedPath = await window.electronAPI.selectDownloadLocation();
+      const { downloadMode, downloadDir } = preferences;
+      if (downloadMode === "ask") {
+        const selectedPath = await window.electronAPI.chooseFolder();
         if (!selectedPath) {
           return;
         } else {
           filePath = `${selectedPath}/%(title)s.%(ext)s`;
         }
       } else {
-        if (!downloadLocation) {
+        if (!downloadDir) {
           toast.warning("Please select a download folder first");
           return;
         } else {
-          filePath = `${downloadLocation}/%(title)s.%(ext)s`;
+          filePath = `${downloadDir}/%(title)s.%(ext)s`;
         }
       }
 
@@ -152,8 +152,8 @@ export default function Home() {
   };
 
   return (
-    <div className="h-dvh flex flex-col items-center justify-center gap-16">
-      <div className="flex flex-col gap-1.5 w-xs sm:w-xl md:w-2xl">
+    <div className="h-dvh flex flex-col items-center justify-center">
+      <div className="flex flex-col gap-2 w-xs sm:w-xl md:w-2xl">
         <InputUrl url={url} setUrl={setUrl} loading={loading} />
         {loading ? (
           <Loading
@@ -162,14 +162,14 @@ export default function Home() {
             eta={eta}
             progress={progress}
             status={status}
-            updating={updating}
+            isUpdate={isUpdate}
           />
         ) : prefLoading ? (
           <div className="text-sm text-center text-muted-foreground mt-2">
             Loading preferences...
           </div>
         ) : (
-          <div className="flex justify-end gap-1.5 w-full">
+          <div className="flex justify-between w-full">
             <Options />
             <Button
               variant="outline"

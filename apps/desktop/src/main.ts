@@ -1,5 +1,7 @@
+import fs from "fs";
 import path from "path";
 import Store from "electron-store";
+import { shell } from "electron/common";
 import { audioArgs } from "./lib/audioArgs";
 import { videoArgs } from "./lib/videoArgs";
 import { autoUpdater } from "electron-updater";
@@ -17,8 +19,9 @@ const FFMPEG = getBundledBinary(isWin ? "ffmpeg.exe" : "ffmpeg");
 const store = new Store<Preferences>({
   defaults: {
     type: "audio",
-    locationMode: "ask",
-    downloadLocation: "",
+    downloadMode: "ask",
+    downloadDir: "",
+    cookiesDir: "",
     audio: {
       preset: "best",
       custom: {
@@ -100,11 +103,9 @@ ipcMain.on("install-update", () => {
   autoUpdater.quitAndInstall();
 });
 
-ipcMain.handle("selectDownloadLocation", async () => {
+ipcMain.handle("chooseFolder", async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
     properties: ["openDirectory"],
-    title: "Select Download Location",
-    buttonLabel: "Select",
   });
 
   if (!canceled && filePaths.length > 0) {
@@ -140,20 +141,22 @@ ipcMain.handle(
 ipcMain.handle("getPreferences", (): Preferences => {
   return {
     type: store.get("type"),
-    locationMode: store.get("locationMode"),
-    downloadLocation: store.get("downloadLocation"),
+    downloadMode: store.get("downloadMode"),
+    downloadDir: store.get("downloadDir"),
     audio: store.get("audio"),
     video: store.get("video"),
+    cookiesDir: store.get("cookiesDir"),
   };
 });
 
 ipcMain.handle("setPreferences", (_event, newPreferences: Preferences) => {
   const current: Preferences = {
     type: store.get("type"),
-    locationMode: store.get("locationMode"),
-    downloadLocation: store.get("downloadLocation"),
+    downloadMode: store.get("downloadMode"),
+    downloadDir: store.get("downloadDir"),
     audio: store.get("audio"),
     video: store.get("video"),
+    cookiesDir: store.get("cookiesDir"),
   };
 
   const merged: Preferences = {
@@ -178,12 +181,23 @@ ipcMain.handle("setPreferences", (_event, newPreferences: Preferences) => {
   };
 
   store.set("type", merged.type);
-  store.set("locationMode", merged.locationMode);
-  store.set("downloadLocation", merged.downloadLocation);
+  store.set("downloadMode", merged.downloadMode);
+  store.set("downloadDir", merged.downloadDir);
   store.set("audio", merged.audio);
   store.set("video", merged.video);
+  if (typeof merged.cookiesDir !== "undefined") {
+    store.set("cookiesDir", merged.cookiesDir || "");
+  }
 
   return true;
+});
+
+ipcMain.handle("openLink", (_, url: string) => {
+  try {
+    shell.openExternal(url);
+  } catch {
+    throw new Error("Failed to open link");
+  }
 });
 
 app.on("ready", createWindow);
@@ -194,7 +208,7 @@ app.on("window-all-closed", () => {
   }
 });
 
-ipcMain.on("download", (event, url, filePath) => {
+ipcMain.on("download", async (event, url, filePath) => {
   if (!isValidUrl(url)) {
     event.reply("download-error", "Invalid URL");
     return;
@@ -213,13 +227,25 @@ ipcMain.on("download", (event, url, filePath) => {
     outTemplate = path.join(downloadDir, filename + ".%(ext)s");
   }
 
-  const { type, audio, video }: Preferences = {
+  const { type, audio, video, cookiesDir }: Preferences = {
     type: store.get("type"),
-    locationMode: store.get("locationMode"),
-    downloadLocation: store.get("downloadLocation"),
+    downloadMode: store.get("downloadMode"),
+    downloadDir: store.get("downloadDir"),
     audio: store.get("audio"),
     video: store.get("video"),
+    cookiesDir: store.get("cookiesDir"),
   };
+
+  if (cookiesDir) {
+    const cookiesFilePath = path.join(cookiesDir, "cookies.txt");
+    if (!fs.existsSync(cookiesFilePath)) {
+      event.reply(
+        "download-error",
+        "cookies.txt not found in the specified cookies directory"
+      );
+      return;
+    }
+  }
 
   let proc;
   try {
@@ -233,6 +259,7 @@ ipcMain.on("download", (event, url, filePath) => {
                 filesystem: {
                   ...audio.custom?.filesystem,
                   output: outTemplate,
+                  cookies: cookiesDir,
                 },
                 postProcessing: {
                   ...audio.custom?.postProcessing,
@@ -250,6 +277,7 @@ ipcMain.on("download", (event, url, filePath) => {
                 filesystem: {
                   ...video.custom?.filesystem,
                   output: outTemplate,
+                  cookies: cookiesDir,
                 },
                 postProcessing: {
                   ...video.custom?.postProcessing,
@@ -306,10 +334,26 @@ ipcMain.on("download", (event, url, filePath) => {
       );
 
       let status = lineWithoutBracket;
-      if (/ETA/i.test(lineWithoutBracket)) status = "Downloading";
-      else if (/Merger/i.test(lineWithoutBracket)) status = "Merging";
-      else if (/Deleting/i.test(lineWithoutBracket)) status = "Finalizing";
-      else status = "...";
+      if (
+        /youtube/i.test(lineWithoutBracket) ||
+        /info/i.test(lineWithoutBracket) ||
+        /sleeping/i.test(lineWithoutBracket)
+      ) {
+        status = "Initializing";
+      } else if (/extractaudio/i.test(lineWithoutBracket)) {
+        status = "Formatting";
+      } else if (
+        /ETA/i.test(lineWithoutBracket) ||
+        /destination/i.test(lineWithoutBracket)
+      ) {
+        status = "Downloading";
+      } else if (/merger/i.test(lineWithoutBracket)) {
+        status = "Merging";
+      } else if (/deleting/i.test(lineWithoutBracket)) {
+        status = "Finalizing";
+      } else {
+        status = "Just a moment";
+      }
 
       const statusPayload: DownloadStatus = {
         status,

@@ -9,14 +9,14 @@ export const Loading = ({
   eta,
   progress,
   status,
-  updating,
+  isUpdate,
 }: {
   size: string;
   speed: string;
   eta: string;
   progress: number;
   status: string;
-  updating: boolean;
+  isUpdate: boolean;
 }) => {
   return (
     <>
@@ -41,7 +41,7 @@ export const Loading = ({
           </span>
         </div>
       </div>
-      {!updating && (
+      {!isUpdate && (
         <div className="mt-1.5 flex justify-end">
           <Button
             variant="outline"

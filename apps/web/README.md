@@ -11,11 +11,15 @@ A modern Next.js web application for downloading content from YouTube and Instag
 - **Component Library**: UI components from shadcn/ui and Radix UI
 - **TypeScript**: Full type safety and enhanced developer experience
 - **Fast Development**: Hot reload and optimized build process with Turbopack
-- **Theme Support**: Light/dark mode toggle with persistent preferences
-- **Advanced Format Options**: Comprehensive audio/video format selection
+- **Tabbed Interface**: Organized settings with General, Video, Audio, and Advanced tabs
+- **Theme Support**: Light/dark mode toggle with system preference detection
+- **Comprehensive Format Options**: 8+ audio formats with detailed tooltips and quality information
+- **Advanced Video Quality**: Resolution options from 144p to 4320p (8K) with container selection
+- **Smart Presets**: "Best" quality preset or "Custom" for full control
+- **Advanced Features**: Cookies support for rate limit bypass (Beta)
 - **Real-time Progress**: Live download progress with ETA, speed, and size tracking
 - **Toast Notifications**: User-friendly feedback with Sonner
-- **Persistent Settings**: User preferences saved across sessions
+- **Persistent Settings**: User preferences saved across sessions with download directory management
 - **Subtitle Options**: Multiple language support and embedding
 - **CI/CD Integration**: Automated builds and deployments with GitHub Actions
 
@@ -74,6 +78,7 @@ bun start
 - **UI Library**: React 19
 - **Styling**: TailwindCSS 4
 - **Components**: shadcn/ui, Radix UI
+- **UI Components**: Card, Tabs, RadioToggleGroup, ToggleGroup
 - **State Management**: React Context API
 - **Notifications**: Sonner (toast notifications)
 - **Icons**: Lucide React
@@ -90,14 +95,21 @@ src/
 ├── components/              # Reusable UI components
 │   ├── ui/                 # shadcn/ui components
 │   │   ├── button.tsx      # Button component
+│   │   ├── card.tsx        # Card layout component
 │   │   ├── dialog.tsx      # Modal dialog component
 │   │   ├── input.tsx       # Input field component
-│   │   ├── select.tsx      # Select dropdown component
+│   │   ├── radio-toggle-group.tsx # Radio toggle group component
 │   │   ├── sonner.tsx      # Toast notification component
+│   │   ├── tabs.tsx        # Tab navigation component
+│   │   ├── toggle-group.tsx # Toggle group component
 │   │   └── tooltip.tsx     # Tooltip component
 │   ├── providers/          # Context providers
 │   │   └── preferencesProvider.tsx
-│   ├── audioOptions.tsx    # Audio format options
-│   ├── videoOptions.tsx    # Video format options
-│   ├── themeToggle.tsx     # Theme switcher
+│   ├── advanced-tab.tsx    # Advanced settings tab
+│   ├── audio-tab.tsx       # Audio format options tab
+│   ├── general-tab.tsx     # General settings tab
+│   ├── input-url.tsx       # URL input component
+│   ├── loading.tsx         # Loading progress component
+│   ├── options.tsx         # Main options dialog
+│   └── video-tab.tsx       # Video format options tab
 ```

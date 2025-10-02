@@ -20,7 +20,7 @@ export const InputUrl = ({
   setUrl: (url: string) => void;
   loading: boolean;
 }) => {
-  const paste = async () => {
+  const pasteLink = async () => {
     try {
       const url = await navigator.clipboard.readText();
       if (!isValidUrl(url)) {
@@ -50,7 +50,7 @@ export const InputUrl = ({
         />
       </ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem onClick={paste}>
+        <ContextMenuItem onClick={pasteLink}>
           <ClipboardPaste /> Paste
         </ContextMenuItem>
       </ContextMenuContent>

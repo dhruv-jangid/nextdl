@@ -15,9 +15,13 @@ NextDL is a modern content downloader for YouTube and Instagram built with Next.
 - Modern Next.js 15 interface with shadcn/ui components
 - Responsive design for all devices
 - Real-time conversion status and progress tracking
-- Advanced audio/video format options
-- Light/dark mode theme toggle
-- Persistent user preferences
+- **Tabbed Settings Interface**: Organized General, Video, Audio, and Advanced tabs
+- **Comprehensive Format Options**: 8+ audio formats (FLAC, ALAC, WAV, OPUS, AAC, M4A, MP3, VORBIS)
+- **Advanced Video Quality**: Resolution options from 144p to 4320p (8K) with container format selection
+- **Advanced Features**: Cookies support for rate limit bypass (Beta)
+- **Enhanced UI Components**: Card-based layout with tooltips and radio toggle groups
+- Light/dark mode theme toggle with system preference detection
+- Persistent user preferences with download directory management
 - Toast notifications for user feedback
 
 ### Desktop Application
@@ -30,11 +34,12 @@ NextDL is a modern content downloader for YouTube and Instagram built with Next.
 
 ### Media Format Support
 
-- **Audio Formats**: MP3, AAC, M4A, FLAC, ALAC, WAV, OPUS, VORBIS
-- **Video Formats**: Resolution options from 144p to 4320p (8K)
-- **Container Formats**: MP4, WEBM, MKV, MOV
-- **Audio Quality**: Bitrate options from 64k to 320k
-- **Custom Settings**: Presets for best quality or advanced custom options
+- **Audio Formats**: MP3, AAC, M4A, FLAC, ALAC, WAV, OPUS, VORBIS with detailed tooltips
+- **Video Formats**: Resolution options from 144p to 4320p (8K) with quality presets
+- **Container Formats**: MP4, WEBM, MKV with compatibility information
+- **Audio Quality**: Bitrate options from 64k to 320k for MP3, best quality for lossless formats
+- **Smart Presets**: "Best" preset for peak quality or "Custom" for full control
+- **Advanced Features**: Cookies support for bypassing rate limits (Beta)
 - **Subtitle Support**: Multiple language options and embedding
 
 ### Technical Architecture
@@ -123,6 +128,7 @@ bun build:desktop  # Build desktop application
 - **State Management**: React Context, Electron Store
 - **Notifications**: Sonner toast notifications
 - **Icons**: Lucide React
+- **UI Components**: Card, Tabs, RadioToggleGroup, ToggleGroup
 - **Build System**: Turborepo, Bun
 - **Package Manager**: Bun 1.2.21
 - **Media Processing**: yt-dlp, FFmpeg (bundled)

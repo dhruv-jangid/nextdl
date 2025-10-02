@@ -19,6 +19,9 @@ export const audioArgs = ({
   args.push("--ffmpeg-location", FFMPEG);
   args.push("--output", OUTPUTDIR);
 
+  if (custom.filesystem?.cookies)
+    args.push("--cookies", custom.filesystem.cookies);
+
   // Handle preset "best" configuration for audio
   if (preset === "best") {
     args.push(
@@ -214,7 +217,6 @@ export const audioArgs = ({
       if (fs.writeComments) args.push("--write-comments");
       if (fs.noWriteComments) args.push("--no-write-comments");
       if (fs.loadInfoJson) args.push("--load-info-json", fs.loadInfoJson);
-      if (fs.cookies) args.push("--cookies", fs.cookies);
       if (fs.noCookies) args.push("--no-cookies");
       if (fs.cookiesFromBrowser)
         args.push("--cookies-from-browser", fs.cookiesFromBrowser);

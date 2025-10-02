@@ -16,8 +16,9 @@ export const PreferencesProvider = ({
 }) => {
   const [preferences, setPreferences] = useState<Preferences>({
     type: "audio",
-    locationMode: "ask",
-    downloadLocation: "",
+    downloadMode: "ask",
+    downloadDir: "",
+    cookiesDir: "",
     audio: {
       preset: "best",
       custom: {

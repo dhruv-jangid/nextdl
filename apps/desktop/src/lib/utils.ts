@@ -26,6 +26,9 @@ export const isValidUrl = (url: string): boolean => {
       if (pathname.startsWith("/shorts/")) {
         return pathname.split("/")[2]?.length > 0;
       }
+      if (pathname.startsWith("/live/")) {
+        return pathname.split("/")[2]?.length > 0;
+      }
       return false;
     }
 

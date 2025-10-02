@@ -8,7 +8,7 @@ declare global {
       onUpdateProgress: (callback: (percent: number) => void) => void;
       onUpdateError: (callback: (error: string) => void) => void;
       installUpdate: () => void;
-      selectDownloadLocation: () => Promise<string | null>;
+      chooseFolder: () => Promise<string | null>;
       showSaveDialog: (
         defaultName: string,
         fileExtension: string
@@ -23,6 +23,7 @@ declare global {
       removeListeners: () => void;
       getPreferences: () => Promise<Preferences>;
       setPreferences: (preferences: Preferences) => Promise<boolean>;
+      openLink: (url: string) => void;
     };
   }
 
@@ -523,9 +524,10 @@ declare global {
 
   type Preferences = {
     type: "audio" | "video";
-    locationMode: "ask" | "choose";
-    downloadLocation: string;
+    downloadMode: "ask" | "choose";
+    downloadDir: string;
     audio: AudioPreferences;
     video: VideoPreferences;
+    cookiesDir?: string;
   };
 }

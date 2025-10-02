@@ -1,6 +1,6 @@
 {
   "name": "nextdl",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "private": true,
   "author": "dhruvjangid",
   "description": "YouTube & Instagram Content Downloader",
@@ -21,18 +21,19 @@
     "clean": "bun cleanbuild && rm -rf apps/desktop/node_modules apps/web/node_modules bun.lock",
     "cleanbuild": "rm -rf apps/desktop/build apps/web/.turbo apps/web/.next apps/desktop/.turbo .turbo",
     "publish": "bun build:web && turbo -F desktop publish",
-    "down": "bun run packages/scripts/downloadBinaries.ts"
+    "down": "bun run packages/scripts/downloadBinaries.ts",
+    "in": "bun i --latest --save && bun update --latest --save"
   },
   "dependencies": {},
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
-    "@types/node": "^24.5.2",
+    "@types/node": "^24.6.1",
     "adm-zip": "^0.5.16",
     "fs-extra": "^11.3.2",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.1",
+    "lint-staged": "^16.2.3",
     "turbo": "^2.5.8",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": ""
